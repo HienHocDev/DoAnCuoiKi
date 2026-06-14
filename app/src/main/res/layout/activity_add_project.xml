@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <TextView
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="44dp"
+            android:gravity="center"
+            android:text="&lt;"
+            android:textColor="#222632"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Thêm dự án"
+            android:textColor="#222632"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <EditText android:id="@+id/edtProjectName" style="@style/FormInput" android:hint="Tên dự án" />
+        <EditText android:id="@+id/edtProjectDescription" style="@style/FormInput" android:hint="Mô tả" />
+        <EditText android:id="@+id/edtStartDate" style="@style/FormInput" android:hint="Ngày bắt đầu" />
+        <EditText android:id="@+id/edtEndDate" style="@style/FormInput" android:hint="Ngày kết thúc" />
+        <EditText android:id="@+id/edtMembers" style="@style/FormInput" android:hint="Thành viên" />
+
+        <Button
+            android:id="@+id/btnCreateProject"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="28dp"
+            android:background="@drawable/bg_primary"
+            android:text="Tạo dự án"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF" />
+    </LinearLayout>
+</ScrollView>

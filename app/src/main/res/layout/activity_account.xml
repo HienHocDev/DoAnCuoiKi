@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="190dp"
+                android:background="@drawable/bg_summary"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/txtAvatar"
+                    android:layout_width="72dp"
+                    android:layout_height="72dp"
+                    android:background="@drawable/bg_card"
+                    android:gravity="center"
+                    android:text="NA"
+                    android:textColor="#5D5FEF"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtProfileName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="12dp"
+                    android:gravity="center"
+                    android:text="Nguyễn Văn A"
+                    android:textColor="#FFFFFF"
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtProfileRole"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Trưởng nhóm"
+                    android:textColor="#FFFFFF" />
+            </LinearLayout>
+
+            <TextView android:id="@+id/btnProfileInfo" style="@style/SettingItem" android:text="Thông tin cá nhân  >" />
+            <TextView android:id="@+id/btnChangePassword" style="@style/SettingItem" android:text="Đổi mật khẩu  >" />
+            <TextView android:id="@+id/btnNotificationSetting" style="@style/SettingItem" android:text="Cài đặt thông báo  >" />
+            <TextView android:id="@+id/btnLanguage" style="@style/SettingItem" android:text="Ngôn ngữ: Tiếng Việt  >" />
+            <TextView android:id="@+id/btnHelp" style="@style/SettingItem" android:text="Trợ giúp  >" />
+            <TextView android:id="@+id/btnLogout" style="@style/SettingItem" android:text="Đăng xuất  >" />
+        </LinearLayout>
+    </ScrollView>
+
+    <include layout="@layout/bottom_nav" />
+</LinearLayout>
