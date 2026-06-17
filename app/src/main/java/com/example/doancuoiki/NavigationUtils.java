@@ -28,6 +28,12 @@ public final class NavigationUtils {
         activity.startActivity(new Intent(activity, target));
     }
 
+    public static void openAndFinish(Activity activity, Class<?> target) {
+        Intent intent = new Intent(activity, target);
+        activity.startActivity(intent);
+        activity.finish();
+    }
+
     public static void showDeveloping(Activity activity, String featureName) {
         Toast.makeText(activity, featureName + " đang phát triển", Toast.LENGTH_SHORT).show();
     }

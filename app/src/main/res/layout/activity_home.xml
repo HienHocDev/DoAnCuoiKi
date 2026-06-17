@@ -19,7 +19,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="Xin chào,\nNguyễn Văn A"
+                android:text="Xin chào,\nTaskFlow"
                 android:textColor="#222632"
                 android:textSize="22sp"
                 android:textStyle="bold" />
@@ -52,7 +52,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="12\nDự án"
+                        android:text="0\nDự án"
                         android:textColor="#FFFFFF"
                         android:textStyle="bold" />
 
@@ -62,7 +62,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="36\nCông việc"
+                        android:text="0\nCông việc"
                         android:textColor="#FFFFFF"
                         android:textStyle="bold" />
 
@@ -72,7 +72,7 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="24\nHoàn thành"
+                        android:text="0\nHoàn thành"
                         android:textColor="#FFFFFF"
                         android:textStyle="bold" />
                 </LinearLayout>

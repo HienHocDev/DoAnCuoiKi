@@ -51,7 +51,7 @@ public class AddTaskActivity extends Activity {
                 title,
                 descriptionInput.getText().toString().trim(),
                 currentUserId,
-                valueOrDefault(assigneeInput.getText().toString(), "Nguyễn Văn A"),
+                valueOrDefault(assigneeInput.getText().toString(), "Chưa phân công"),
                 currentUserId,
                 Task.STATUS_NOT_STARTED,
                 "Trung bình",
@@ -76,7 +76,7 @@ public class AddTaskActivity extends Activity {
     private String currentUserId() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
-            return "u001";
+            return "guest";
         }
         return user.getUid();
     }

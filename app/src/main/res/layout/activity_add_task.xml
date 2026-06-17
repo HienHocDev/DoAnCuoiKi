@@ -12,13 +12,7 @@
 
         <TextView
             android:id="@+id/btnBack"
-            android:layout_width="48dp"
-            android:layout_height="44dp"
-            android:gravity="center"
-            android:text="&lt;"
-            android:textColor="#222632"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            style="@style/BackButton" />
 
         <TextView
             android:layout_width="match_parent"

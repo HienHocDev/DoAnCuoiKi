@@ -34,6 +34,15 @@
                 android:paddingHorizontal="14dp"
                 android:textSize="14sp" />
 
+            <TextView
+                android:id="@+id/txtProjectState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Đang tải dự án..."
+                android:textColor="#7D8496"
+                android:textSize="13sp" />
+
             <LinearLayout
                 android:id="@+id/projectList"
                 android:layout_width="match_parent"

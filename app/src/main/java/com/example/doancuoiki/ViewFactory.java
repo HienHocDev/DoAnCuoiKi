@@ -54,6 +54,22 @@ public final class ViewFactory {
         return card;
     }
 
+    public static View reportProgressCard(Context context, String title, String subtitle, int progress) {
+        LinearLayout card = card(context);
+        card.addView(text(context, title, 15, true, Color.rgb(34, 38, 50)));
+        card.addView(text(context, subtitle, 12, false, Color.rgb(125, 132, 150)));
+
+        ProgressBar progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
+        progressBar.setMax(100);
+        progressBar.setProgress(Math.max(0, Math.min(progress, 100)));
+        card.addView(progressBar, topParams(-1, dp(context, 8), dp(context, 10)));
+
+        TextView percent = text(context, progress + "%", 12, true, Color.rgb(93, 95, 239));
+        percent.setGravity(Gravity.END);
+        card.addView(percent);
+        return card;
+    }
+
     private static LinearLayout card(Context context) {
         LinearLayout card = new LinearLayout(context);
         card.setOrientation(LinearLayout.VERTICAL);
