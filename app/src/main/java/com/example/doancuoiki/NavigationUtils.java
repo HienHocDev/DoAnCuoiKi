@@ -32,6 +32,10 @@ public final class NavigationUtils {
         Toast.makeText(activity, featureName + " đang phát triển", Toast.LENGTH_SHORT).show();
     }
 
+    public static void showMessage(Activity activity, String message) {
+        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+    }
+
     private static void setupItem(Activity activity, int viewId, String tab, String selectedTab, Class<?> target) {
         TextView item = activity.findViewById(viewId);
         if (item == null) {

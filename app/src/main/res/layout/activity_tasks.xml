@@ -46,12 +46,36 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <TextView android:id="@+id/tabAll" style="@style/TaskTab" android:text="Tất cả" />
-                    <TextView android:id="@+id/tabMine" style="@style/TaskTab" android:text="Của tôi" />
-                    <TextView android:id="@+id/tabAssigned" style="@style/TaskTab" android:text="Đã giao" />
-                    <TextView android:id="@+id/tabProject" style="@style/TaskTab" android:text="Theo dự án" />
+                    <TextView
+                        android:id="@+id/tabAll"
+                        style="@style/TaskTab"
+                        android:text="Tất cả" />
+
+                    <TextView
+                        android:id="@+id/tabMine"
+                        style="@style/TaskTab"
+                        android:text="Của tôi" />
+
+                    <TextView
+                        android:id="@+id/tabAssigned"
+                        style="@style/TaskTab"
+                        android:text="Đã giao" />
+
+                    <TextView
+                        android:id="@+id/tabProject"
+                        style="@style/TaskTab"
+                        android:text="Theo dự án" />
                 </LinearLayout>
             </HorizontalScrollView>
+
+            <TextView
+                android:id="@+id/txtTaskState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Đang tải công việc..."
+                android:textColor="#7D8496"
+                android:textSize="13sp" />
 
             <LinearLayout
                 android:id="@+id/taskList"
