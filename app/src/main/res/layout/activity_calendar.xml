@@ -41,6 +41,15 @@
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
+            <TextView
+                android:id="@+id/txtCalendarState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Đang tải công việc..."
+                android:textColor="#7D8496"
+                android:textSize="13sp" />
+
             <LinearLayout
                 android:id="@+id/calendarTaskList"
                 android:layout_width="match_parent"

@@ -24,8 +24,7 @@ public class TasksActivity extends Activity {
     private static final String FILTER_MINE = "mine";
     private static final String FILTER_ASSIGNED = "assigned";
     private static final String FILTER_PROJECT = "project";
-    private static final String SAMPLE_USER_ID = "u001";
-    private static final String SAMPLE_PROJECT_FILTER = "Website bán hàng";
+    private static final String GUEST_USER_ID = "guest";
 
     private final TaskRepository taskRepository = new TaskRepository();
     private final List<Task> allTasks = new ArrayList<>();
@@ -40,7 +39,7 @@ public class TasksActivity extends Activity {
 
     private String currentFilter = FILTER_ALL;
     private String currentKeyword = "";
-    private String currentUserId = SAMPLE_USER_ID;
+    private String currentUserId = GUEST_USER_ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -104,8 +103,7 @@ public class TasksActivity extends Activity {
             public void onSuccess(List<Task> tasks) {
                 allTasks.clear();
                 if (tasks.isEmpty()) {
-                    allTasks.addAll(sampleTasks());
-                    taskState.setText("Đang hiển thị dữ liệu mẫu. Firestore chưa có công việc.");
+                    taskState.setText("Chưa có công việc nào. Hãy thêm công việc đầu tiên.");
                 } else {
                     allTasks.addAll(tasks);
                     taskState.setText("Đã tải " + tasks.size() + " công việc từ Firestore.");
@@ -116,8 +114,7 @@ public class TasksActivity extends Activity {
             @Override
             public void onError(Exception exception) {
                 allTasks.clear();
-                allTasks.addAll(sampleTasks());
-                taskState.setText("Không tải được Firestore, đang hiển thị dữ liệu mẫu.");
+                taskState.setText("Không tải được công việc từ Firestore.");
                 renderTasks();
             }
         });
@@ -152,7 +149,7 @@ public class TasksActivity extends Activity {
         }
 
         if (FILTER_PROJECT.equals(currentFilter)) {
-            taskState.setText("Đang lọc theo dự án: " + SAMPLE_PROJECT_FILTER);
+            taskState.setText("Hiển thị " + filteredTasks.size() + " công việc đã có dự án.");
         } else {
             taskState.setText("Hiển thị " + filteredTasks.size() + " công việc.");
         }
@@ -193,7 +190,7 @@ public class TasksActivity extends Activity {
             return currentUserId.equals(task.getCreatorId()) && !currentUserId.equals(task.getAssigneeId());
         }
         if (FILTER_PROJECT.equals(currentFilter)) {
-            return SAMPLE_PROJECT_FILTER.equals(task.getProjectName());
+            return task.getProjectName() != null && !task.getProjectName().trim().isEmpty();
         }
         return true;
     }
@@ -229,7 +226,7 @@ public class TasksActivity extends Activity {
     private void updateTaskStatus(Task task, String status) {
         task.setStatus(status);
 
-        if (task.getId() == null || task.getId().startsWith("sample")) {
+        if (task.getId() == null) {
             renderTasks();
             return;
         }
@@ -268,23 +265,4 @@ public class TasksActivity extends Activity {
         return Color.rgb(93, 95, 239);
     }
 
-    private List<Task> sampleTasks() {
-        List<Task> tasks = new ArrayList<>();
-        tasks.add(new Task("sample-1", "p001", "Website bán hàng", "Thiết kế giao diện trang chủ",
-                "Thiết kế giao diện trang chủ theo yêu cầu khách hàng.",
-                SAMPLE_USER_ID, "Nguyễn Văn A", SAMPLE_USER_ID, Task.STATUS_IN_PROGRESS, "Cao", "20/05/2024", "30/05/2024"));
-        tasks.add(new Task("sample-2", "p001", "Website bán hàng", "Xây dựng API sản phẩm",
-                "Xây dựng API cho danh sách sản phẩm.",
-                "u002", "Trần Thị B", SAMPLE_USER_ID, Task.STATUS_IN_PROGRESS, "Cao", "01/06/2024", "10/08/2024"));
-        tasks.add(new Task("sample-3", "p003", "Phần mềm quản lý", "Viết tài liệu hướng dẫn",
-                "Soạn tài liệu hướng dẫn sử dụng phần mềm.",
-                SAMPLE_USER_ID, "Nguyễn Văn A", "u002", Task.STATUS_DONE, "Trung bình", "10/08/2024", "25/08/2024"));
-        tasks.add(new Task("sample-4", "p004", "Nghiên cứu thị trường", "Nghiên cứu đối thủ",
-                "Tổng hợp thông tin đối thủ trong cùng lĩnh vực.",
-                "u003", "Lê Văn C", SAMPLE_USER_ID, Task.STATUS_DONE, "Thấp", "12/05/2024", "16/05/2024"));
-        tasks.add(new Task("sample-5", "p002", "Ứng dụng di động", "Kiểm thử chức năng đăng nhập",
-                "Kiểm thử đăng nhập, đăng xuất và quên mật khẩu.",
-                "u002", "Trần Thị B", SAMPLE_USER_ID, Task.STATUS_NOT_STARTED, "Trung bình", "01/09/2024", "08/09/2024"));
-        return tasks;
-    }
 }
