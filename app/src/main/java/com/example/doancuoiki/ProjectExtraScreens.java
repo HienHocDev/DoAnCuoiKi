@@ -8,14 +8,23 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class ProjectExtraScreens {
     public View addProject(Context context, TaskFlowNavigator navigator) {
+        FirebaseFirestore db = FirebaseFirestore.getInstance();
+
         ScrollView scroll = UiKit.screen(context);
         LinearLayout page = UiKit.page(context);
         scroll.addView(page);
 
         UiKit.addTopBar(context, page, "Thêm dự án", "", v -> navigator.showProjects(), null);
+
         TextView icon = UiKit.text(context, "+", 34, android.graphics.Color.WHITE, true);
         icon.setGravity(Gravity.CENTER);
         icon.setBackground(UiKit.round(context, UiKit.PRIMARY, 34));
@@ -24,14 +33,94 @@ public class ProjectExtraScreens {
         iconWrap.addView(icon, UiKit.lp(context, 68, 68));
         page.addView(iconWrap, UiKit.top(context, -1, 96, 20));
 
-        addField(context, page, "Tên dự án", "Nhập tên dự án", 52);
-        addField(context, page, "Mô tả", "Nhập mô tả dự án", 70);
-        addField(context, page, "Ngày bắt đầu", "Chọn ngày bắt đầu", 52);
-        addField(context, page, "Ngày kết thúc", "Chọn ngày kết thúc", 52);
-        addField(context, page, "Thành viên", "Chọn thành viên", 52);
+        // 1. Tên dự án
+        page.addView(UiKit.text(context, "Tên dự án", 13, UiKit.TEXT, true), UiKit.top(context, -1, -2, 14));
+        EditText inputName = UiKit.input(context, "Nhập tên dự án");
+        page.addView(inputName, UiKit.top(context, -1, 52, 6));
 
+        // 2. Mô tả
+        page.addView(UiKit.text(context, "Mô tả", 13, UiKit.TEXT, true), UiKit.top(context, -1, -2, 14));
+        EditText inputDesc = UiKit.input(context, "Nhập mô tả dự án");
+        page.addView(inputDesc, UiKit.top(context, -1, 70, 6));
+
+        // 3. Ngày bắt đầu (Đã nâng cấp lên chọn lịch)
+        page.addView(UiKit.text(context, "Ngày bắt đầu", 13, UiKit.TEXT, true), UiKit.top(context, -1, -2, 14));
+        EditText inputStart = UiKit.input(context, "Chọn ngày bắt đầu");
+        inputStart.setFocusable(false); // Chặn hiện bàn phím chữ
+        inputStart.setClickable(true);
+        inputStart.setOnClickListener(v -> {
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            int year = calendar.get(java.util.Calendar.YEAR);
+            int month = calendar.get(java.util.Calendar.MONTH);
+            int day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+
+            android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(context,
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        String date = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
+                        inputStart.setText(date);
+                    }, year, month, day);
+            datePickerDialog.show();
+        });
+        page.addView(inputStart, UiKit.top(context, -1, 52, 6));
+
+        // 4. Ngày kết thúc (Đã nâng cấp lên chọn lịch)
+        page.addView(UiKit.text(context, "Ngày kết thúc", 13, UiKit.TEXT, true), UiKit.top(context, -1, -2, 14));
+        EditText inputEnd = UiKit.input(context, "Chọn ngày kết thúc");
+        inputEnd.setFocusable(false); // Chặn hiện bàn phím chữ
+        inputEnd.setClickable(true);
+        inputEnd.setOnClickListener(v -> {
+            java.util.Calendar calendar = java.util.Calendar.getInstance();
+            int year = calendar.get(java.util.Calendar.YEAR);
+            int month = calendar.get(java.util.Calendar.MONTH);
+            int day = calendar.get(java.util.Calendar.DAY_OF_MONTH);
+
+            android.app.DatePickerDialog datePickerDialog = new android.app.DatePickerDialog(context,
+                    (view, selectedYear, selectedMonth, selectedDay) -> {
+                        String date = String.format("%02d/%02d/%d", selectedDay, selectedMonth + 1, selectedYear);
+                        inputEnd.setText(date);
+                    }, year, month, day);
+            datePickerDialog.show();
+        });
+        page.addView(inputEnd, UiKit.top(context, -1, 52, 6));
+
+        // 5. Thành viên
+        page.addView(UiKit.text(context, "Thành viên", 13, UiKit.TEXT, true), UiKit.top(context, -1, -2, 14));
+        EditText inputMembers = UiKit.input(context, "Chọn thành viên");
+        page.addView(inputMembers, UiKit.top(context, -1, 52, 6));
+
+        // NÚT LƯU DỰ ÁN LÊN FIREBASE THẬT
         Button create = UiKit.primaryButton(context, "Tạo dự án");
-        create.setOnClickListener(v -> navigator.underDevelopment("Lưu dự án lên Firebase"));
+        create.setOnClickListener(v -> {
+            String name = inputName.getText().toString().trim();
+            String desc = inputDesc.getText().toString().trim();
+            String startDate = inputStart.getText().toString().trim();
+            String endDate = inputEnd.getText().toString().trim();
+
+            if (name.isEmpty()) {
+                Toast.makeText(context, "Vui lòng nhập tên dự án", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            String projectId = UUID.randomUUID().toString();
+
+            Map<String, Object> project = new HashMap<>();
+            project.put("id", projectId);
+            project.put("name", name);
+            project.put("description", desc);
+            project.put("startDate", startDate);
+            project.put("endDate", endDate);
+            project.put("progress", 0);
+            project.put("createdAt", com.google.firebase.Timestamp.now());
+
+            db.collection("projects").document(projectId).set(project)
+                    .addOnSuccessListener(aVoid -> {
+                        Toast.makeText(context, "Tạo dự án thành công!", Toast.LENGTH_SHORT).show();
+                        navigator.showHome();
+                    })
+                    .addOnFailureListener(e -> {
+                        Toast.makeText(context, "Lỗi tạo dự án: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                    });
+        });
         page.addView(create, UiKit.top(context, -1, 52, 28));
         return scroll;
     }
@@ -112,12 +201,6 @@ public class ProjectExtraScreens {
         addNotification(context, page, "Cuộc họp sắp diễn ra", "Họp nhóm dự án vào 11:00 hôm nay", "5 giờ trước");
         addNotification(context, page, "Công việc hoàn thành", "Nghiên cứu đối thủ đã hoàn thành", "1 ngày trước");
         return scroll;
-    }
-
-    private void addField(Context context, LinearLayout page, String label, String hint, int height) {
-        page.addView(UiKit.text(context, label, 13, UiKit.TEXT, true), UiKit.top(context, -1, -2, 14));
-        EditText input = UiKit.input(context, hint);
-        page.addView(input, UiKit.top(context, -1, height, 6));
     }
 
     private void addNotification(Context context, LinearLayout page, String title, String body, String time) {

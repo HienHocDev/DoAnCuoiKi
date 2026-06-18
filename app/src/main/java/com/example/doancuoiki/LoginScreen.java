@@ -61,7 +61,7 @@ public class LoginScreen {
         });
         page.addView(forgot, UiKit.top(context, -1, -2, 8));
 
-        // 2. CHỨC NĂNG ĐĂNG NHẬP THẬT BẰNG FIREBASE
+        // 2. CHỨC NĂNG ĐĂNG NHẬP THẬT BẰNG FIREBASE (ĐÃ SỬA LỖI ĐIỀU HƯỚNG)
         Button login = UiKit.primaryButton(context, "Đăng nhập");
         login.setOnClickListener(v -> {
             String emailStr = email.getText().toString().trim();
@@ -76,7 +76,12 @@ public class LoginScreen {
                     .addOnCompleteListener(task -> {
                         if (task.isSuccessful()) {
                             Toast.makeText(context, "Đăng nhập thành công!", Toast.LENGTH_SHORT).show();
-                            navigator.showHome();
+
+                            // Đưa lệnh điều hướng vào MainLooper giao diện để đổi màn hình ngay lập tức
+                            new android.os.Handler(android.os.Looper.getMainLooper()).postDelayed(() -> {
+                                navigator.showHome();
+                            }, 200);
+
                         } else {
                             Toast.makeText(context, "Sai tài khoản hoặc mật khẩu: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                         }
