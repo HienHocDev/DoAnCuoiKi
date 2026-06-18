@@ -4,16 +4,15 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_app">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+    <LinearLayout style="@style/ScreenContent">
 
         <TextView
             android:id="@+id/btnBack"
             style="@style/BackButton" />
-        <TextView android:id="@+id/txtProjectTitle" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Chi tiết dự án" android:textColor="#222632" android:textSize="24sp" android:textStyle="bold" />
+        <TextView
+            android:id="@+id/txtProjectTitle"
+            style="@style/ScreenTitle"
+            android:text="Chi tiết dự án" />
 
         <TextView
             android:id="@+id/txtProjectDescription"
@@ -33,15 +32,41 @@
             android:textColor="#7D8496"
             android:textSize="13sp" />
 
-        <LinearLayout android:layout_width="match_parent" android:layout_height="94dp" android:layout_marginTop="16dp" android:orientation="horizontal">
-            <TextView android:id="@+id/txtProjectTaskCount" style="@style/MetricCard" android:text="0\nTổng công việc" />
-            <TextView android:id="@+id/txtProjectDoneCount" style="@style/MetricCard" android:text="0\nHoàn thành" />
-            <TextView android:id="@+id/txtProjectProgress" style="@style/MetricCard" android:text="0%\nTiến độ" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="94dp"
+            android:layout_marginTop="18dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtProjectTaskCount"
+                style="@style/MetricCard"
+                android:text="0\nTổng công việc" />
+
+            <TextView
+                android:id="@+id/txtProjectDoneCount"
+                style="@style/MetricCard"
+                android:text="0\nHoàn thành" />
+
+            <TextView
+                android:id="@+id/txtProjectProgress"
+                style="@style/MetricCard"
+                android:text="0%\nTiến độ" />
         </LinearLayout>
 
-        <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="22dp" android:text="Danh sách công việc" android:textColor="#222632" android:textSize="18sp" android:textStyle="bold" />
-        <LinearLayout android:id="@+id/projectTaskList" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" />
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Danh sách công việc" />
 
-        <Button android:id="@+id/btnOpenReport" android:layout_width="match_parent" android:layout_height="52dp" android:layout_marginTop="18dp" android:background="@drawable/bg_primary" android:text="Xem báo cáo tiến độ" android:textAllCaps="false" android:textColor="#FFFFFF" />
+        <LinearLayout
+            android:id="@+id/projectTaskList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <Button
+            android:id="@+id/btnOpenReport"
+            style="@style/PrimaryButton"
+            android:text="Xem báo cáo tiến độ" />
     </LinearLayout>
 </ScrollView>

@@ -4,29 +4,26 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_app">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+    <LinearLayout style="@style/ScreenContent">
 
         <TextView
             android:id="@+id/btnBack"
             style="@style/BackButton" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/ScreenTitle"
             android:text="Báo cáo tiến độ"
-            android:textColor="#222632"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            />
+
+        <TextView
+            style="@style/ScreenSubtitle"
+            android:text="Tổng hợp tiến độ từ công việc của bạn" />
 
         <TextView
             android:id="@+id/txtReportState"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="14dp"
             android:text="Đang tải báo cáo..."
             android:textColor="#7D8496"
             android:textSize="13sp" />
@@ -66,13 +63,9 @@
         </LinearLayout>
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            style="@style/SectionTitle"
             android:text="Tiến độ theo dự án"
-            android:textColor="#222632"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            />
 
         <LinearLayout
             android:id="@+id/reportProjectList"
@@ -81,16 +74,23 @@
             android:orientation="vertical" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            style="@style/SectionTitle"
             android:text="Hiệu suất thành viên"
-            android:textColor="#222632"
-            android:textSize="18sp"
-            android:textStyle="bold" />
+            />
 
         <LinearLayout
             android:id="@+id/memberPerformanceList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Công việc theo độ ưu tiên"
+            />
+
+        <LinearLayout
+            android:id="@+id/priorityChartList"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical" />

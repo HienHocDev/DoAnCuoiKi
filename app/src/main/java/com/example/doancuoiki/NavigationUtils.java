@@ -3,6 +3,9 @@ package com.example.doancuoiki;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.PorterDuff;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -17,11 +20,11 @@ public final class NavigationUtils {
     }
 
     public static void setupBottomNav(Activity activity, String selectedTab) {
-        setupItem(activity, R.id.navHome, HOME, selectedTab, HomeActivity.class);
-        setupItem(activity, R.id.navProjects, PROJECTS, selectedTab, ProjectsActivity.class);
-        setupItem(activity, R.id.navTasks, TASKS, selectedTab, TasksActivity.class);
-        setupItem(activity, R.id.navCalendar, CALENDAR, selectedTab, CalendarActivity.class);
-        setupItem(activity, R.id.navAccount, ACCOUNT, selectedTab, AccountActivity.class);
+        setupItem(activity, R.id.navHome, R.id.iconHome, R.id.textHome, HOME, selectedTab, HomeActivity.class);
+        setupItem(activity, R.id.navProjects, R.id.iconProjects, R.id.textProjects, PROJECTS, selectedTab, ProjectsActivity.class);
+        setupItem(activity, R.id.navTasks, R.id.iconTasks, R.id.textTasks, TASKS, selectedTab, TasksActivity.class);
+        setupItem(activity, R.id.navCalendar, R.id.iconCalendar, R.id.textCalendar, CALENDAR, selectedTab, CalendarActivity.class);
+        setupItem(activity, R.id.navAccount, R.id.iconAccount, R.id.textAccount, ACCOUNT, selectedTab, AccountActivity.class);
     }
 
     public static void open(Activity activity, Class<?> target) {
@@ -42,15 +45,28 @@ public final class NavigationUtils {
         Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
     }
 
-    private static void setupItem(Activity activity, int viewId, String tab, String selectedTab, Class<?> target) {
-        TextView item = activity.findViewById(viewId);
+    private static void setupItem(Activity activity, int viewId, int iconId, int labelId,
+                                  String tab, String selectedTab, Class<?> target) {
+        View item = activity.findViewById(viewId);
         if (item == null) {
             return;
         }
 
         boolean selected = tab.equals(selectedTab);
-        item.setTextColor(selected ? Color.rgb(93, 95, 239) : Color.rgb(125, 132, 150));
-        item.setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        int color = selected ? Color.rgb(93, 95, 239) : Color.rgb(125, 132, 150);
+        item.setBackgroundResource(selected ? R.drawable.bg_nav_selected : 0);
+
+        ImageView icon = activity.findViewById(iconId);
+        if (icon != null) {
+            icon.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        }
+
+        TextView label = activity.findViewById(labelId);
+        if (label != null) {
+            label.setTextColor(color);
+            label.setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
+        }
+
         item.setOnClickListener(v -> {
             if (!selected) {
                 open(activity, target);

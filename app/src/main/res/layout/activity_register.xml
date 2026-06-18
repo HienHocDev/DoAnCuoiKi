@@ -6,30 +6,23 @@
     android:fillViewport="true">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="28dp">
+        style="@style/ScreenContent"
+        android:paddingLeft="28dp"
+        android:paddingRight="28dp">
 
         <TextView
             android:id="@+id/btnBack"
             style="@style/BackButton" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            style="@style/ScreenTitle"
             android:layout_marginTop="24dp"
             android:text="Tạo tài khoản"
-            android:textColor="#222632"
-            android:textSize="28sp"
-            android:textStyle="bold" />
+            android:textSize="28sp" />
 
         <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="6dp"
+            style="@style/ScreenSubtitle"
             android:text="Đăng ký để bắt đầu quản lý công việc nhóm"
-            android:textColor="#7D8496"
             android:textSize="14sp" />
 
         <EditText
@@ -57,12 +50,9 @@
 
         <Button
             android:id="@+id/btnRegister"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
+            style="@style/PrimaryButton"
             android:layout_marginTop="24dp"
-            android:background="@drawable/bg_primary"
             android:text="Đăng ký"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF" />
+            />
     </LinearLayout>
 </ScrollView>

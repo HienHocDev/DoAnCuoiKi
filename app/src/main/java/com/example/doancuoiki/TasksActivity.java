@@ -1,14 +1,17 @@
 package com.example.doancuoiki;
 
 import android.app.Activity;
-import android.app.AlertDialog;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.doancuoiki.model.Task;
@@ -17,7 +20,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class TasksActivity extends Activity {
     private static final String FILTER_ALL = "all";
@@ -36,10 +41,13 @@ public class TasksActivity extends Activity {
     private TextView tabAssigned;
     private TextView tabProject;
     private EditText searchInput;
+    private Spinner projectFilterSpinner;
 
     private String currentFilter = FILTER_ALL;
     private String currentKeyword = "";
     private String currentUserId = GUEST_USER_ID;
+    private String selectedProjectId = "";
+    private final List<String> projectFilterIds = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +58,14 @@ public class TasksActivity extends Activity {
         bindViews();
         setupActions();
         resolveCurrentUser();
-        loadTasks();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (taskList != null) {
+            loadTasks();
+        }
     }
 
     private void bindViews() {
@@ -61,6 +76,7 @@ public class TasksActivity extends Activity {
         tabMine = findViewById(R.id.tabMine);
         tabAssigned = findViewById(R.id.tabAssigned);
         tabProject = findViewById(R.id.tabProject);
+        projectFilterSpinner = findViewById(R.id.spinnerProjectFilter);
     }
 
     private void setupActions() {
@@ -71,6 +87,19 @@ public class TasksActivity extends Activity {
         tabMine.setOnClickListener(v -> changeFilter(FILTER_MINE));
         tabAssigned.setOnClickListener(v -> changeFilter(FILTER_ASSIGNED));
         tabProject.setOnClickListener(v -> changeFilter(FILTER_PROJECT));
+        projectFilterSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (position >= 0 && position < projectFilterIds.size()) {
+                    selectedProjectId = projectFilterIds.get(position);
+                    renderTasks();
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -98,7 +127,7 @@ public class TasksActivity extends Activity {
 
     private void loadTasks() {
         taskState.setText("Đang tải công việc...");
-        taskRepository.getAllTasks(new TaskRepository.TaskListCallback() {
+        taskRepository.getTasksForUser(currentUserId, new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
                 allTasks.clear();
@@ -108,12 +137,14 @@ public class TasksActivity extends Activity {
                     allTasks.addAll(tasks);
                     taskState.setText("Đã tải " + tasks.size() + " công việc từ Firestore.");
                 }
+                setupProjectFilter();
                 renderTasks();
             }
 
             @Override
             public void onError(Exception exception) {
                 allTasks.clear();
+                setupProjectFilter();
                 taskState.setText("Không tải được công việc từ Firestore.");
                 renderTasks();
             }
@@ -131,6 +162,7 @@ public class TasksActivity extends Activity {
         setTabState(tabMine, FILTER_MINE.equals(currentFilter));
         setTabState(tabAssigned, FILTER_ASSIGNED.equals(currentFilter));
         setTabState(tabProject, FILTER_PROJECT.equals(currentFilter));
+        projectFilterSpinner.setVisibility(FILTER_PROJECT.equals(currentFilter) ? View.VISIBLE : View.GONE);
     }
 
     private void setTabState(TextView tab, boolean selected) {
@@ -149,7 +181,7 @@ public class TasksActivity extends Activity {
         }
 
         if (FILTER_PROJECT.equals(currentFilter)) {
-            taskState.setText("Hiển thị " + filteredTasks.size() + " công việc đã có dự án.");
+            taskState.setText("Hiển thị " + filteredTasks.size() + " công việc theo dự án.");
         } else {
             taskState.setText("Hiển thị " + filteredTasks.size() + " công việc.");
         }
@@ -163,9 +195,32 @@ public class TasksActivity extends Activity {
                     badgeBackground(task.getStatus()),
                     badgeColor(task.getStatus())
             );
-            card.setOnClickListener(v -> showStatusDialog(task));
+            card.setOnClickListener(v -> openTaskDetail(task));
             taskList.addView(card);
         }
+    }
+
+    private void setupProjectFilter() {
+        Map<String, String> projectMap = new LinkedHashMap<>();
+        projectMap.put("", "Tất cả dự án");
+        for (Task task : allTasks) {
+            String projectId = task.getProjectId();
+            String projectName = task.getProjectName();
+            if (projectId != null && !projectId.trim().isEmpty()
+                    && projectName != null && !projectName.trim().isEmpty()) {
+                projectMap.put(projectId, projectName);
+            }
+        }
+
+        projectFilterIds.clear();
+        projectFilterIds.addAll(projectMap.keySet());
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                new ArrayList<>(projectMap.values())
+        );
+        projectFilterSpinner.setAdapter(adapter);
+        selectedProjectId = projectFilterIds.isEmpty() ? "" : projectFilterIds.get(0);
     }
 
     private List<Task> filterTasks() {
@@ -190,7 +245,10 @@ public class TasksActivity extends Activity {
             return currentUserId.equals(task.getCreatorId()) && !currentUserId.equals(task.getAssigneeId());
         }
         if (FILTER_PROJECT.equals(currentFilter)) {
-            return task.getProjectName() != null && !task.getProjectName().trim().isEmpty();
+            if (selectedProjectId == null || selectedProjectId.isEmpty()) {
+                return task.getProjectId() != null && !task.getProjectId().trim().isEmpty();
+            }
+            return selectedProjectId.equals(task.getProjectId());
         }
         return true;
     }
@@ -209,40 +267,10 @@ public class TasksActivity extends Activity {
         return value != null && value.toLowerCase().contains(keyword);
     }
 
-    private void showStatusDialog(Task task) {
-        String[] statuses = {
-                Task.STATUS_NOT_STARTED,
-                Task.STATUS_IN_PROGRESS,
-                Task.STATUS_DONE
-        };
-
-        new AlertDialog.Builder(this)
-                .setTitle(task.getTitle())
-                .setItems(statuses, (dialog, which) -> updateTaskStatus(task, statuses[which]))
-                .setNegativeButton("Đóng", null)
-                .show();
-    }
-
-    private void updateTaskStatus(Task task, String status) {
-        task.setStatus(status);
-
-        if (task.getId() == null) {
-            renderTasks();
-            return;
-        }
-
-        taskRepository.updateTaskStatus(task.getId(), status, new TaskRepository.SimpleCallback() {
-            @Override
-            public void onSuccess() {
-                renderTasks();
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                NavigationUtils.showMessage(TasksActivity.this, "Cập nhật trạng thái Firestore lỗi");
-                renderTasks();
-            }
-        });
+    private void openTaskDetail(Task task) {
+        Intent intent = new Intent(this, TaskDetailActivity.class);
+        intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, task.getId());
+        startActivity(intent);
     }
 
     private int badgeBackground(String status) {

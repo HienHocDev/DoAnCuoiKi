@@ -14,6 +14,7 @@
         <activity
             android:name=".RegisterActivity"
             android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".TaskDetailActivity" />
         <activity android:name=".AddTaskActivity" />
         <activity android:name=".NotificationsActivity" />
         <activity android:name=".ReportActivity" />

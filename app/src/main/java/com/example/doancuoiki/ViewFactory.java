@@ -25,6 +25,35 @@ public final class ViewFactory {
         return card;
     }
 
+    public static View homeProjectCard(Context context, String name, String subtitle, int progress, View.OnClickListener listener) {
+        LinearLayout card = card(context);
+        card.setPadding(dp(context, 16), dp(context, 16), dp(context, 16), dp(context, 16));
+        card.setOnClickListener(listener);
+
+        LinearLayout header = new LinearLayout(context);
+        header.setOrientation(LinearLayout.HORIZONTAL);
+        header.setGravity(Gravity.CENTER_VERTICAL);
+
+        LinearLayout textColumn = new LinearLayout(context);
+        textColumn.setOrientation(LinearLayout.VERTICAL);
+        textColumn.addView(text(context, name, 16, true, Color.rgb(34, 38, 50)));
+        textColumn.addView(text(context, subtitle, 12, false, Color.rgb(125, 132, 150)));
+        header.addView(textColumn, new LinearLayout.LayoutParams(0, -2, 1));
+
+        TextView percent = text(context, progress + "%", 14, true, Color.rgb(93, 95, 239));
+        percent.setGravity(Gravity.CENTER);
+        percent.setBackgroundResource(R.drawable.bg_soft_primary);
+        header.addView(percent, new LinearLayout.LayoutParams(dp(context, 58), dp(context, 34)));
+        card.addView(header);
+
+        ProgressBar progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
+        progressBar.setMax(100);
+        progressBar.setProgress(Math.max(0, Math.min(progress, 100)));
+        card.addView(progressBar, topParams(-1, dp(context, 8), dp(context, 12)));
+
+        return card;
+    }
+
     public static View taskCard(Context context, String title, String subtitle, String status, int badgeBackground, int badgeColor) {
         LinearLayout row = new LinearLayout(context);
         row.setOrientation(LinearLayout.HORIZONTAL);
