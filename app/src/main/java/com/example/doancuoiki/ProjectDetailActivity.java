@@ -121,15 +121,23 @@ public class ProjectDetailActivity extends Activity {
         }
 
         for (Task task : tasks) {
-            taskList.addView(ViewFactory.taskCard(
+            android.view.View card = ViewFactory.taskCard(
                     this,
                     task.getTitle(),
                     valueOrDefault(task.getDueDate(), "Chưa có hạn") + " - " + valueOrDefault(task.getAssigneeName(), "Chưa phân công"),
                     task.getStatus(),
                     badgeBackground(task.getStatus()),
                     badgeColor(task.getStatus())
-            ));
+            );
+            card.setOnClickListener(v -> openTaskDetail(task));
+            taskList.addView(card);
         }
+    }
+
+    private void openTaskDetail(Task task) {
+        Intent intent = new Intent(this, TaskDetailActivity.class);
+        intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, task.getId());
+        startActivity(intent);
     }
 
     private void updateProjectProgressIfNeeded(List<Task> tasks) {

@@ -4,38 +4,73 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_app">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="20dp">
+    <LinearLayout style="@style/ScreenContent">
 
         <TextView
             android:id="@+id/btnBack"
             style="@style/BackButton" />
 
         <TextView
+            style="@style/ScreenTitle"
+            android:text="Thêm dự án"
+            />
+
+        <TextView
+            style="@style/ScreenSubtitle"
+            android:text="Tạo dự án mới và thêm thành viên bằng email" />
+
+        <EditText
+            android:id="@+id/edtProjectName"
+            style="@style/FormInput"
+            android:hint="Tên dự án" />
+
+        <EditText
+            android:id="@+id/edtProjectDescription"
+            style="@style/FormInput"
+            android:hint="Mô tả"
+            android:minLines="3" />
+
+        <EditText
+            android:id="@+id/edtStartDate"
+            style="@style/FormInput"
+            android:clickable="true"
+            android:focusable="false"
+            android:hint="Ngày bắt đầu" />
+
+        <EditText
+            android:id="@+id/edtEndDate"
+            style="@style/FormInput"
+            android:clickable="true"
+            android:focusable="false"
+            android:hint="Ngày kết thúc" />
+
+        <EditText
+            android:id="@+id/edtMembers"
+            style="@style/FormInput"
+            android:hint="Email hoặc UID thành viên, cách nhau bằng dấu phẩy" />
+
+        <TextView
+            android:id="@+id/txtMemberHint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Thêm dự án"
-            android:textColor="#222632"
-            android:textSize="24sp"
-            android:textStyle="bold" />
+            android:layout_marginTop="8dp"
+            android:text="Bạn tạo dự án sẽ tự động là thành viên. Muốn bạn khác thấy dự án, nhập email tài khoản đã đăng ký Firebase."
+            android:textColor="#7D8496"
+            android:textSize="12sp" />
 
-        <EditText android:id="@+id/edtProjectName" style="@style/FormInput" android:hint="Tên dự án" />
-        <EditText android:id="@+id/edtProjectDescription" style="@style/FormInput" android:hint="Mô tả" />
-        <EditText android:id="@+id/edtStartDate" style="@style/FormInput" android:hint="Ngày bắt đầu" />
-        <EditText android:id="@+id/edtEndDate" style="@style/FormInput" android:hint="Ngày kết thúc" />
-        <EditText android:id="@+id/edtMembers" style="@style/FormInput" android:hint="Thành viên" />
+        <TextView
+            android:id="@+id/txtCreateState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="#7D8496"
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnCreateProject"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
+            style="@style/PrimaryButton"
             android:layout_marginTop="28dp"
-            android:background="@drawable/bg_primary"
             android:text="Tạo dự án"
-            android:textAllCaps="false"
-            android:textColor="#FFFFFF" />
+            />
     </LinearLayout>
 </ScrollView>

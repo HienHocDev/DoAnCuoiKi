@@ -1,7 +1,9 @@
 package com.example.doancuoiki;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -14,7 +16,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 public class NotificationsActivity extends Activity {
     private static final String GUEST_USER_ID = "guest";
@@ -66,15 +70,17 @@ public class NotificationsActivity extends Activity {
     }
 
     private void loadTaskBasedNotifications() {
-        taskRepository.getAllTasks(new TaskRepository.TaskListCallback() {
+        taskRepository.getTasksForUser(currentUserId, new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
                 notifications.addAll(createNotificationsFromTasks(tasks));
+                deduplicateNotifications();
                 renderNotifications();
             }
 
             @Override
             public void onError(Exception exception) {
+                deduplicateNotifications();
                 renderNotifications();
             }
         });
@@ -95,7 +101,9 @@ public class NotificationsActivity extends Activity {
                 ));
             }
 
-            if (!Task.STATUS_DONE.equals(task.getStatus()) && DateUtils.isDueSoon(task.getDueDate(), 3)) {
+            if (currentUserId.equals(task.getAssigneeId())
+                    && !Task.STATUS_DONE.equals(task.getStatus())
+                    && DateUtils.isDueSoon(task.getDueDate(), 3)) {
                 generated.add(new NotificationItem(
                         "deadline-" + task.getId(),
                         currentUserId,
@@ -107,7 +115,8 @@ public class NotificationsActivity extends Activity {
                 ));
             }
 
-            if (Task.STATUS_DONE.equals(task.getStatus())) {
+            if ((currentUserId.equals(task.getAssigneeId()) || currentUserId.equals(task.getCreatorId()))
+                    && Task.STATUS_DONE.equals(task.getStatus())) {
                 generated.add(new NotificationItem(
                         "done-" + task.getId(),
                         currentUserId,
@@ -122,6 +131,19 @@ public class NotificationsActivity extends Activity {
         return generated;
     }
 
+    private void deduplicateNotifications() {
+        Map<String, NotificationItem> notificationMap = new LinkedHashMap<>();
+        for (NotificationItem notification : notifications) {
+            String key = notification.getId();
+            if (key == null || key.trim().isEmpty()) {
+                key = notification.getTitle() + "-" + notification.getMessage();
+            }
+            notificationMap.put(key, notification);
+        }
+        notifications.clear();
+        notifications.addAll(notificationMap.values());
+    }
+
     private void renderNotifications() {
         notificationList.removeAllViews();
 
@@ -132,13 +154,41 @@ public class NotificationsActivity extends Activity {
 
         notificationState.setText("Có " + notifications.size() + " thông báo.");
         for (NotificationItem notification : notifications) {
-            notificationList.addView(ViewFactory.notificationCard(
+            View card = ViewFactory.notificationCard(
                     this,
                     notification.getTitle(),
                     notification.getMessage(),
                     notification.isRead() ? "Đã đọc" : notification.getCreatedAt()
-            ));
+            );
+            String taskId = taskIdFromNotification(notification);
+            if (taskId != null) {
+                card.setOnClickListener(v -> openTaskDetail(taskId));
+            }
+            notificationList.addView(card);
         }
+    }
+
+    private String taskIdFromNotification(NotificationItem notification) {
+        String id = notification.getId();
+        if (id == null) {
+            return null;
+        }
+        if (id.startsWith("task-")) {
+            return id.substring("task-".length());
+        }
+        if (id.startsWith("deadline-")) {
+            return id.substring("deadline-".length());
+        }
+        if (id.startsWith("done-")) {
+            return id.substring("done-".length());
+        }
+        return null;
+    }
+
+    private void openTaskDetail(String taskId) {
+        Intent intent = new Intent(this, TaskDetailActivity.class);
+        intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, taskId);
+        startActivity(intent);
     }
 
 }

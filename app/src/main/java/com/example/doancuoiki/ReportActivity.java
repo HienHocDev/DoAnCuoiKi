@@ -7,12 +7,16 @@ import android.widget.TextView;
 
 import com.example.doancuoiki.model.Task;
 import com.example.doancuoiki.repository.TaskRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class ReportActivity extends Activity {
+    private static final String GUEST_USER_ID = "guest";
+
     private final TaskRepository taskRepository = new TaskRepository();
 
     private TextView reportState;
@@ -22,6 +26,8 @@ public class ReportActivity extends Activity {
     private TextView todoCount;
     private LinearLayout projectList;
     private LinearLayout memberList;
+    private LinearLayout priorityList;
+    private String currentUserId = GUEST_USER_ID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,6 +35,7 @@ public class ReportActivity extends Activity {
         setContentView(R.layout.activity_report);
 
         bindViews();
+        resolveCurrentUser();
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         loadReport();
     }
@@ -49,11 +56,19 @@ public class ReportActivity extends Activity {
         todoCount = findViewById(R.id.txtTodoCount);
         projectList = findViewById(R.id.reportProjectList);
         memberList = findViewById(R.id.memberPerformanceList);
+        priorityList = findViewById(R.id.priorityChartList);
+    }
+
+    private void resolveCurrentUser() {
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            currentUserId = user.getUid();
+        }
     }
 
     private void loadReport() {
         reportState.setText("Đang tải báo cáo...");
-        taskRepository.getAllTasks(new TaskRepository.TaskListCallback() {
+        taskRepository.getTasksForUser(currentUserId, new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
                 if (tasks.isEmpty()) {
@@ -86,10 +101,12 @@ public class ReportActivity extends Activity {
 
         renderProjectProgress(tasks);
         renderMemberPerformance(tasks);
+        renderPriorityChart(tasks);
 
         if (tasks.isEmpty()) {
             projectList.addView(ViewFactory.notificationCard(this, "Chưa có dữ liệu", "Tạo công việc để xem tiến độ theo dự án.", ""));
             memberList.addView(ViewFactory.notificationCard(this, "Chưa có dữ liệu", "Phân công công việc để xem hiệu suất thành viên.", ""));
+            priorityList.addView(ViewFactory.notificationCard(this, "Chưa có dữ liệu", "Thêm độ ưu tiên cho công việc để xem biểu đồ.", ""));
         }
     }
 
@@ -118,6 +135,36 @@ public class ReportActivity extends Activity {
                     this,
                     entry.getKey(),
                     stats.done + "/" + stats.total + " công việc hoàn thành",
+                    progress
+            ));
+        }
+    }
+
+    private void renderPriorityChart(List<Task> tasks) {
+        priorityList.removeAllViews();
+
+        Map<String, Integer> statsMap = new HashMap<>();
+        statsMap.put("Cao", 0);
+        statsMap.put("Trung bình", 0);
+        statsMap.put("Thấp", 0);
+
+        for (Task task : tasks) {
+            String priority = valueOrDefault(task.getPriority(), "Trung bình");
+            if (!statsMap.containsKey(priority)) {
+                statsMap.put(priority, 0);
+            }
+            statsMap.put(priority, statsMap.get(priority) + 1);
+        }
+
+        for (Map.Entry<String, Integer> entry : statsMap.entrySet()) {
+            if (tasks.isEmpty()) {
+                continue;
+            }
+            int progress = percent(entry.getValue(), tasks.size());
+            priorityList.addView(ViewFactory.reportProgressCard(
+                    this,
+                    entry.getKey(),
+                    entry.getValue() + "/" + tasks.size() + " công việc",
                     progress
             ));
         }

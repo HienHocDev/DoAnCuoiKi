@@ -10,29 +10,22 @@
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="20dp">
+        <LinearLayout style="@style/ScreenContent">
 
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                style="@style/ScreenTitle"
                 android:text="Dự án"
-                android:textColor="#222632"
-                android:textSize="24sp"
-                android:textStyle="bold" />
+                />
+
+            <TextView
+                style="@style/ScreenSubtitle"
+                android:text="Theo dõi các dự án bạn tham gia" />
 
             <EditText
                 android:id="@+id/edtSearchProject"
-                android:layout_width="match_parent"
-                android:layout_height="46dp"
-                android:layout_marginTop="18dp"
-                android:background="@drawable/bg_input"
+                style="@style/SearchInput"
                 android:hint="Tìm kiếm dự án..."
-                android:paddingHorizontal="14dp"
-                android:textSize="14sp" />
+                />
 
             <TextView
                 android:id="@+id/txtProjectState"
@@ -51,13 +44,9 @@
 
             <Button
                 android:id="@+id/btnOpenAddProject"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_primary"
+                style="@style/PrimaryButton"
                 android:text="+  Thêm dự án"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF" />
+                />
         </LinearLayout>
     </ScrollView>
 

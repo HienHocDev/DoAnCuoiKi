@@ -14,43 +14,91 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingLeft="20dp"
+            android:paddingTop="42dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="20dp">
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Xin chào,\nTaskFlow"
-                android:textColor="#222632"
-                android:textSize="22sp"
-                android:textStyle="bold" />
+                android:layout_height="58dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Xin chào,"
+                        android:textColor="#7D8496"
+                        android:textSize="14sp" />
+
+                    <TextView
+                        android:id="@+id/txtHomeUserName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="TaskFlow"
+                        android:textColor="#222632"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/txtHomeAvatar"
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:background="@drawable/bg_avatar_home"
+                    android:gravity="center"
+                    android:text="TF"
+                    android:textColor="#5D5FEF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="22dp"
                 android:background="@drawable/bg_summary"
                 android:orientation="vertical"
-                android:padding="18dp">
+                android:padding="20dp">
 
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Tổng quan dự án"
                     android:textColor="#FFFFFF"
-                    android:textSize="16sp"
+                    android:textSize="17sp"
                     android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtSummarySubtitle"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="4dp"
+                    android:text="Theo dõi tiến độ công việc nhóm của bạn"
+                    android:textColor="#DDE0FF"
+                    android:textSize="13sp" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="70dp"
-                    android:layout_marginTop="12dp"
+                    android:layout_height="76dp"
+                    android:layout_marginTop="16dp"
                     android:orientation="horizontal">
 
                     <TextView
                         android:id="@+id/txtTotalProjects"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
+                        android:layout_marginRight="8dp"
                         android:layout_weight="1"
+                        android:background="@drawable/bg_summary_inner"
                         android:gravity="center"
                         android:text="0\nDự án"
                         android:textColor="#FFFFFF"
@@ -60,7 +108,9 @@
                         android:id="@+id/txtTotalTasks"
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
+                        android:layout_marginRight="8dp"
                         android:layout_weight="1"
+                        android:background="@drawable/bg_summary_inner"
                         android:gravity="center"
                         android:text="0\nCông việc"
                         android:textColor="#FFFFFF"
@@ -71,6 +121,7 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
+                        android:background="@drawable/bg_summary_inner"
                         android:gravity="center"
                         android:text="0\nHoàn thành"
                         android:textColor="#FFFFFF"
@@ -78,14 +129,30 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <TextView
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="22dp"
-                android:text="Dự án của bạn"
-                android:textColor="#222632"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:layout_height="40dp"
+                android:layout_marginTop="24dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Dự án của bạn"
+                    android:textColor="#222632"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/txtProjectCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0 dự án"
+                    android:textColor="#7D8496"
+                    android:textSize="13sp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:id="@+id/homeProjectList"
@@ -95,13 +162,8 @@
 
             <Button
                 android:id="@+id/btnAddProject"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:layout_marginTop="16dp"
-                android:background="@drawable/bg_primary"
-                android:text="+  Thêm dự án"
-                android:textAllCaps="false"
-                android:textColor="#FFFFFF" />
+                style="@style/PrimaryButton"
+                android:text="+  Thêm dự án" />
         </LinearLayout>
     </ScrollView>
 
