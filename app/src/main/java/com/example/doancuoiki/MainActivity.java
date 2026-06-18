@@ -25,11 +25,20 @@ public class MainActivity extends AppCompatActivity implements TaskFlowNavigator
     private final AccountScreen accountScreen = new AccountScreen();
     private final ProjectExtraScreens extraScreens = new ProjectExtraScreens();
 
+    // Khai báo thêm màn hình Đăng ký
+    private final RegisterScreen registerScreen = new RegisterScreen();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         showLogin();
+    }
+
+    // THỰC HIỆN HÀM CHUYỂN SANG MÀN HÌNH ĐĂNG KÝ THẬT
+    @Override
+    public void showRegister() {
+        setContentView(registerScreen.create(this, this));
     }
 
     @Override

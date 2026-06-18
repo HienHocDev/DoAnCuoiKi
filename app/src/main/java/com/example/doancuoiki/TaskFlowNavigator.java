@@ -1,6 +1,7 @@
 package com.example.doancuoiki;
 
 public interface TaskFlowNavigator {
+
     void showLogin();
 
     void showHome();
@@ -24,4 +25,5 @@ public interface TaskFlowNavigator {
     void showNotifications();
 
     void underDevelopment(String featureName);
+    void showRegister();
 }
