@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app">
+
+    <LinearLayout style="@style/ScreenContent">
+
+        <TextView
+            android:id="@+id/btnBack"
+            style="@style/BackButton" />
+
+        <TextView
+            style="@style/ScreenTitle"
+            android:text="Báo cáo tiến độ"
+            />
+
+        <TextView
+            style="@style/ScreenSubtitle"
+            android:text="Tổng hợp tiến độ từ công việc của bạn" />
+
+        <TextView
+            android:id="@+id/txtReportState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:text="Đang tải báo cáo..."
+            android:textColor="#7D8496"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/txtOverallProgress"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_soft_primary"
+            android:gravity="center"
+            android:text="0%"
+            android:textColor="#222632"
+            android:textSize="36sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="94dp"
+            android:layout_marginTop="16dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/txtDoneCount"
+                style="@style/MetricCard"
+                android:text="0\nHoàn thành" />
+
+            <TextView
+                android:id="@+id/txtDoingCount"
+                style="@style/MetricCard"
+                android:text="0\nĐang làm" />
+
+            <TextView
+                android:id="@+id/txtTodoCount"
+                style="@style/MetricCard"
+                android:text="0\nChưa bắt đầu" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Tiến độ theo dự án"
+            />
+
+        <LinearLayout
+            android:id="@+id/reportProjectList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Hiệu suất thành viên"
+            />
+
+        <LinearLayout
+            android:id="@+id/memberPerformanceList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <TextView
+            style="@style/SectionTitle"
+            android:text="Công việc theo độ ưu tiên"
+            />
+
+        <LinearLayout
+            android:id="@+id/priorityChartList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </LinearLayout>
+</ScrollView>

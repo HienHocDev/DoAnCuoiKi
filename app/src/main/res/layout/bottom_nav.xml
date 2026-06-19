@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottomNav"
+    android:layout_width="match_parent"
+    android:layout_height="72dp"
+    android:background="#FFFFFF"
+    android:gravity="center"
+    android:orientation="horizontal"
+    android:padding="4dp">
+
+    <LinearLayout
+        android:id="@+id/navHome"
+        style="@style/BottomNavItem">
+
+        <ImageView
+            android:id="@+id/iconHome"
+            style="@style/BottomNavIcon"
+            android:src="@drawable/ic_nav_home" />
+
+        <TextView
+            android:id="@+id/textHome"
+            style="@style/BottomNavLabel"
+            android:text="Trang chủ" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navProjects"
+        style="@style/BottomNavItem">
+
+        <ImageView
+            android:id="@+id/iconProjects"
+            style="@style/BottomNavIcon"
+            android:src="@drawable/ic_nav_projects" />
+
+        <TextView
+            android:id="@+id/textProjects"
+            style="@style/BottomNavLabel"
+            android:text="Dự án" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navTasks"
+        style="@style/BottomNavItem">
+
+        <ImageView
+            android:id="@+id/iconTasks"
+            style="@style/BottomNavIcon"
+            android:src="@drawable/ic_nav_tasks" />
+
+        <TextView
+            android:id="@+id/textTasks"
+            style="@style/BottomNavLabel"
+            android:text="Công việc" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navCalendar"
+        style="@style/BottomNavItem">
+
+        <ImageView
+            android:id="@+id/iconCalendar"
+            style="@style/BottomNavIcon"
+            android:src="@drawable/ic_nav_calendar" />
+
+        <TextView
+            android:id="@+id/textCalendar"
+            style="@style/BottomNavLabel"
+            android:text="Lịch" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/navAccount"
+        style="@style/BottomNavItem">
+
+        <ImageView
+            android:id="@+id/iconAccount"
+            style="@style/BottomNavIcon"
+            android:src="@drawable/ic_nav_account" />
+
+        <TextView
+            android:id="@+id/textAccount"
+            style="@style/BottomNavLabel"
+            android:text="Tài khoản" />
+    </LinearLayout>
+</LinearLayout>

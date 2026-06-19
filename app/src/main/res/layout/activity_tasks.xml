@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app"
+    android:orientation="vertical">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout style="@style/ScreenContent">
+
+            <TextView
+                style="@style/ScreenTitle"
+                android:text="Công việc"
+                />
+
+            <TextView
+                style="@style/ScreenSubtitle"
+                android:text="Quản lý việc được giao và việc bạn đã giao" />
+
+            <EditText
+                android:id="@+id/edtSearchTask"
+                style="@style/SearchInput"
+                android:hint="Tìm kiếm công việc..."
+                />
+
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="10dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tabAll"
+                        style="@style/TaskTab"
+                        android:text="Tất cả" />
+
+                    <TextView
+                        android:id="@+id/tabMine"
+                        style="@style/TaskTab"
+                        android:text="Của tôi" />
+
+                    <TextView
+                        android:id="@+id/tabAssigned"
+                        style="@style/TaskTab"
+                        android:text="Đã giao" />
+
+                    <TextView
+                        android:id="@+id/tabProject"
+                        style="@style/TaskTab"
+                        android:text="Theo dự án" />
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <Spinner
+                android:id="@+id/spinnerProjectFilter"
+                style="@style/FormSpinner"
+                android:layout_marginTop="4dp"
+                android:visibility="gone" />
+
+            <TextView
+                android:id="@+id/txtTaskState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="Đang tải công việc..."
+                android:textColor="#7D8496"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:id="@+id/taskList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical" />
+
+            <Button
+                android:id="@+id/btnAddTask"
+                style="@style/PrimaryButton"
+                android:text="+  Thêm công việc"
+                />
+        </LinearLayout>
+    </ScrollView>
+
+    <include layout="@layout/bottom_nav" />
+</LinearLayout>

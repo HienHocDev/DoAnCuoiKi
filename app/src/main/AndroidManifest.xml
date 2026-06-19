@@ -12,6 +12,23 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Doancuoiki">
         <activity
+            android:name=".RegisterActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity android:name=".TaskDetailActivity" />
+        <activity android:name=".AddTaskActivity" />
+        <activity android:name=".NotificationsActivity" />
+        <activity android:name=".ReportActivity" />
+        <activity android:name=".ProjectDetailActivity" />
+        <activity android:name=".AddProjectActivity" />
+        <activity android:name=".AccountActivity" />
+        <activity android:name=".CalendarActivity" />
+        <activity android:name=".TasksActivity" />
+        <activity android:name=".ProjectsActivity" />
+        <activity android:name=".HomeActivity" />
+        <activity
+            android:name=".LoginActivity"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
             android:name=".MainActivity"
             android:exported="true"
             android:windowSoftInputMode="adjustResize">
