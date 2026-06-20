@@ -13,43 +13,40 @@
         <LinearLayout style="@style/ScreenContent">
 
             <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="190dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/bg_summary"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <ImageView
+                android:id="@+id/txtAvatar"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:background="@drawable/bg_card"
+                android:scaleType="centerCrop"
+                android:layout_gravity="center" />
+
+            <TextView
+                android:id="@+id/txtProfileName"
                 android:layout_width="match_parent"
-                android:layout_height="190dp"
-                android:layout_marginTop="4dp"
-                android:background="@drawable/bg_summary"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:gravity="center"
-                android:orientation="vertical">
+                android:text="Người dùng"
+                android:textColor="#FFFFFF"
+                android:textSize="22sp"
+                android:textStyle="bold" />
 
-                <TextView
-                    android:id="@+id/txtAvatar"
-                    android:layout_width="72dp"
-                    android:layout_height="72dp"
-                    android:background="@drawable/bg_card"
-                    android:gravity="center"
-                    android:text="NA"
-                    android:textColor="#5D5FEF"
-                    android:textSize="24sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txtProfileName"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:gravity="center"
-                    android:text="Người dùng"
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/txtProfileRole"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="Trưởng nhóm"
-                    android:textColor="#FFFFFF" />
-            </LinearLayout>
+            <TextView
+                android:id="@+id/txtProfileRole"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="Trưởng nhóm"
+                android:textColor="#FFFFFF" />
+        </LinearLayout>
 
             <TextView android:id="@+id/btnProfileInfo" style="@style/SettingItem" android:text="Thông tin cá nhân  >" />
             <TextView android:id="@+id/btnChangePassword" style="@style/SettingItem" android:text="Đổi mật khẩu  >" />
