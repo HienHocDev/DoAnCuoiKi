@@ -4,37 +4,35 @@ import com.example.doancuoiki.model.User;
 import com.google.android.gms.tasks.Tasks;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.SetOptions;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class UserRepository {
     public interface UserCallback {
         void onSuccess(User user);
-
         void onError(Exception exception);
     }
 
     public interface SimpleCallback {
         void onSuccess();
-
         void onError(Exception exception);
     }
 
     public interface UserListCallback {
         void onSuccess(List<User> users);
-
         void onError(Exception exception);
     }
 
     public interface MemberResolveCallback {
         void onSuccess(List<String> userIds, List<String> unresolvedMembers);
-
         void onError(Exception exception);
     }
 
     private static final String COLLECTION_USERS = "users";
-
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
     public void createUser(User user, SimpleCallback callback) {
@@ -61,10 +59,26 @@ public class UserRepository {
                 .addOnFailureListener(callback::onError);
     }
 
+    // NÂNG CẤP CHỐNG LỖI NOT_FOUND: Đổi sang dùng .set và SetOptions.merge()
     public void updateName(String userId, String name, SimpleCallback callback) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("name", name);
+
         db.collection(COLLECTION_USERS)
                 .document(userId)
-                .update("name", name)
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onError);
+    }
+
+    // TÍNH NĂNG CAO CẤP: Lưu link ảnh đại diện (avatarUrl) lên Cloud Firestore
+    public void updateAvatar(String uid, String avatarUrl, SimpleCallback callback) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("avatarUrl", avatarUrl);
+
+        db.collection(COLLECTION_USERS)
+                .document(uid)
+                .set(data, SetOptions.merge())
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onError);
     }
