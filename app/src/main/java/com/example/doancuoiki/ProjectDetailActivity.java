@@ -196,7 +196,7 @@ public class ProjectDetailActivity extends Activity {
         if (Task.STATUS_IN_PROGRESS.equals(status)) {
             return Color.rgb(239, 173, 68);
         }
-        return Color.rgb(93, 95, 239);
+        return Color.rgb(34, 197, 94);
     }
 
     private String valueOrDefault(String value, String defaultValue) {

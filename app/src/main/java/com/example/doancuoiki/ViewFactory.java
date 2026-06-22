@@ -40,7 +40,7 @@ public final class ViewFactory {
         textColumn.addView(text(context, subtitle, 12, false, Color.rgb(125, 132, 150)));
         header.addView(textColumn, new LinearLayout.LayoutParams(0, -2, 1));
 
-        TextView percent = text(context, progress + "%", 14, true, Color.rgb(93, 95, 239));
+        TextView percent = text(context, progress + "%", 14, true, Color.rgb(34, 197, 94));
         percent.setGravity(Gravity.CENTER);
         percent.setBackgroundResource(R.drawable.bg_soft_primary);
         header.addView(percent, new LinearLayout.LayoutParams(dp(context, 58), dp(context, 34)));
@@ -93,7 +93,7 @@ public final class ViewFactory {
         progressBar.setProgress(Math.max(0, Math.min(progress, 100)));
         card.addView(progressBar, topParams(-1, dp(context, 8), dp(context, 10)));
 
-        TextView percent = text(context, progress + "%", 12, true, Color.rgb(93, 95, 239));
+        TextView percent = text(context, progress + "%", 12, true, Color.rgb(34, 197, 94));
         percent.setGravity(Gravity.END);
         card.addView(percent);
         return card;

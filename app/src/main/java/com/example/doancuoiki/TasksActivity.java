@@ -166,7 +166,7 @@ public class TasksActivity extends Activity {
     }
 
     private void setTabState(TextView tab, boolean selected) {
-        tab.setTextColor(selected ? Color.rgb(93, 95, 239) : Color.rgb(125, 132, 150));
+        tab.setTextColor(selected ? Color.rgb(34, 197, 94) : Color.rgb(125, 132, 150));
         tab.setTypeface(null, selected ? android.graphics.Typeface.BOLD : android.graphics.Typeface.NORMAL);
     }
 
@@ -290,7 +290,7 @@ public class TasksActivity extends Activity {
         if (Task.STATUS_IN_PROGRESS.equals(status)) {
             return Color.rgb(239, 173, 68);
         }
-        return Color.rgb(93, 95, 239);
+        return Color.rgb(34, 197, 94);
     }
 
 }

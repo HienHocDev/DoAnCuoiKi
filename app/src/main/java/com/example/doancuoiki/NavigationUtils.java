@@ -53,7 +53,7 @@ public final class NavigationUtils {
         }
 
         boolean selected = tab.equals(selectedTab);
-        int color = selected ? Color.rgb(93, 95, 239) : Color.rgb(125, 132, 150);
+        int color = selected ? Color.rgb(34, 197, 94) : Color.rgb(125, 132, 150);
         item.setBackgroundResource(selected ? R.drawable.bg_nav_selected : 0);
 
         ImageView icon = activity.findViewById(iconId);
