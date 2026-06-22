@@ -19,7 +19,7 @@
             android:background="@drawable/bg_soft_primary"
             android:gravity="center"
             android:text="TASKFLOW"
-            android:textColor="#5D5FEF"
+            android:textColor="#22C55E"
             android:textSize="28sp"
             android:textStyle="bold" />
 
@@ -29,7 +29,7 @@
             android:layout_marginTop="18dp"
             android:gravity="center"
             android:text="TaskFlow"
-            android:textColor="#5D5FEF"
+            android:textColor="#22C55E"
             android:textSize="28sp"
             android:textStyle="bold" />
 
@@ -61,7 +61,7 @@
             android:layout_marginTop="8dp"
             android:gravity="end"
             android:text="Quên mật khẩu?"
-            android:textColor="#4648D2"
+            android:textColor="#15803D"
             android:textSize="13sp" />
 
         <Button

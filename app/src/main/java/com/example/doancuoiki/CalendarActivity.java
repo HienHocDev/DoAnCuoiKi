@@ -187,7 +187,7 @@ public class CalendarActivity extends Activity {
             dayNumber.setBackgroundResource(R.drawable.bg_calendar_selected_day);
         } else if (isToday) {
             dayNumber.setBackgroundResource(R.drawable.bg_calendar_today);
-            dayNumber.setTextColor(Color.rgb(93, 95, 239));
+            dayNumber.setTextColor(Color.rgb(34, 197, 94));
         }
         cell.addView(dayNumber, new LinearLayout.LayoutParams(dp(32), dp(32)));
 
@@ -321,7 +321,7 @@ public class CalendarActivity extends Activity {
         if (Task.STATUS_IN_PROGRESS.equals(status)) {
             return Color.rgb(239, 173, 68);
         }
-        return Color.rgb(93, 95, 239);
+        return Color.rgb(34, 197, 94);
     }
 
     private GridLayout.LayoutParams gridParams(int rowSpan, int heightDp) {
