@@ -16,6 +16,7 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
+import android.view.View;
 
 public class ProjectsActivity extends Activity {
     public static final String EXTRA_PROJECT_ID = "projectId";
@@ -114,15 +115,16 @@ public class ProjectsActivity extends Activity {
 
         List<Project> filtered = filterProjects();
         if (filtered.isEmpty()) {
-            projectState.setText("Không có dự án phù hợp.");
+            projectState.setVisibility(View.VISIBLE);
+            if (currentKeyword.isEmpty()) {
+                projectState.setText("Chưa có dự án nào. Hãy tạo dự án đầu tiên.");
+            } else {
+                projectState.setText("Không có dự án phù hợp.");
+            }
             return;
         }
 
-        if (currentKeyword.isEmpty()) {
-            projectState.setText("Hiển thị " + filtered.size() + " dự án.");
-        } else {
-            projectState.setText("Tìm thấy " + filtered.size() + " dự án.");
-        }
+        projectState.setVisibility(View.GONE);
 
         for (Project project : filtered) {
             String subtitle = project.getDescription();

@@ -11,11 +11,12 @@ public class Project {
     private String endDate;
     private int progress;
     private String ownerId;
-    private List<String> members = new ArrayList<>();
+    private List<String> members;
     private String createdAt;
     private String updatedAt;
 
     public Project() {
+        this.members = new ArrayList<>();
     }
 
     public Project(String id, String name, String description, String startDate, String endDate,

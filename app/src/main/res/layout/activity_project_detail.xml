@@ -9,6 +9,7 @@
         <TextView
             android:id="@+id/btnBack"
             style="@style/BackButton" />
+
         <TextView
             android:id="@+id/txtProjectTitle"
             style="@style/ScreenTitle"
@@ -64,9 +65,37 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnEditProject"
+                style="@style/PrimaryButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginEnd="6dp"
+                android:layout_marginTop="0dp"
+                android:backgroundTint="#5D5FEF"
+                android:text="Sửa dự án" />
+
+            <Button
+                android:id="@+id/btnDeleteProject"
+                style="@style/PrimaryButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:layout_marginTop="0dp"
+                android:backgroundTint="#FF4D4D"
+                android:text="Xóa dự án" />
+        </LinearLayout>
+
         <Button
             android:id="@+id/btnOpenReport"
             style="@style/PrimaryButton"
             android:text="Xem báo cáo tiến độ" />
+
     </LinearLayout>
 </ScrollView>

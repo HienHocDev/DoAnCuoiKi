@@ -160,6 +160,9 @@ public class AddProjectActivity extends Activity {
     private List<String> parseMemberInputs() {
         List<String> members = new ArrayList<>();
         String rawMembers = membersInput.getText().toString();
+        if (rawMembers.isEmpty()) {
+            return members;
+        }
         String[] parts = rawMembers.split(",");
         for (String part : parts) {
             String member = part.trim();
