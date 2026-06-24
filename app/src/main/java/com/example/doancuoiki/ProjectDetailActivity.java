@@ -26,6 +26,10 @@ public class ProjectDetailActivity extends Activity {
     private TextView progressText;
     private LinearLayout taskList;
 
+    // Khai báo thêm 2 biến điều khiển nút bấm Sửa và Xóa
+    private android.view.View btnEdit;
+    private android.view.View btnDelete;
+
     private String projectId;
     private Project currentProject;
 
@@ -36,9 +40,15 @@ public class ProjectDetailActivity extends Activity {
 
         bindViews();
         projectId = getIntent().getStringExtra(ProjectsActivity.EXTRA_PROJECT_ID);
+
+        // Cấu hình sự kiện cho các nút bấm
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnOpenReport).setOnClickListener(v ->
                 NavigationUtils.open(this, ReportActivity.class));
+
+        // Gắn sự kiện click cho nút Sửa và Xóa dự án vừa thêm
+        btnEdit.setOnClickListener(v -> openEditProject());
+        btnDelete.setOnClickListener(v -> confirmDeleteProject());
 
         loadProject();
     }
@@ -59,6 +69,10 @@ public class ProjectDetailActivity extends Activity {
         doneTaskText = findViewById(R.id.txtProjectDoneCount);
         progressText = findViewById(R.id.txtProjectProgress);
         taskList = findViewById(R.id.projectTaskList);
+
+        // Ánh xạ id nút bấm từ layout XML
+        btnEdit = findViewById(R.id.btnEditProject);
+        btnDelete = findViewById(R.id.btnDeleteProject);
     }
 
     private void loadProject() {
@@ -140,6 +154,45 @@ public class ProjectDetailActivity extends Activity {
         startActivity(intent);
     }
 
+    // Hàm xử lý hiển thị hộp thoại xác nhận xóa dự án
+    private void confirmDeleteProject() {
+        if (currentProject == null) return;
+
+        new android.app.AlertDialog.Builder(this)
+                .setTitle("Xóa dự án")
+                .setMessage("Bạn có chắc chắn muốn xóa dự án \"" + currentProject.getName() + "\" không? Toàn bộ các công việc bên trong cũng sẽ bị gỡ bỏ.")
+                .setPositiveButton("Xóa", (dialog, which) -> {
+                    projectRepository.deleteProject(projectId, new ProjectRepository.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            NavigationUtils.showMessage(ProjectDetailActivity.this, "Đã xóa dự án thành công");
+                            finish(); // Đóng màn hình chi tiết, tự động quay trở lại danh sách
+                        }
+
+                        @Override
+                        public void onError(Exception exception) {
+                            NavigationUtils.showMessage(ProjectDetailActivity.this, "Xóa thất bại: " + exception.getMessage());
+                        }
+                    });
+                })
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    // Hàm xử lý đóng gói thông tin hiện tại và gửi sang AddProjectActivity để chỉnh sửa
+    private void openEditProject() {
+        if (currentProject == null) return;
+
+        Intent intent = new Intent(this, AddProjectActivity.class);
+        intent.putExtra("isEditMode", true);
+        intent.putExtra(ProjectsActivity.EXTRA_PROJECT_ID, currentProject.getId());
+        intent.putExtra("projectName", currentProject.getName());
+        intent.putExtra("projectDesc", currentProject.getDescription());
+        intent.putExtra("startDate", currentProject.getStartDate());
+        intent.putExtra("endDate", currentProject.getEndDate());
+        startActivity(intent);
+    }
+
     private void updateProjectProgressIfNeeded(List<Task> tasks) {
         if (currentProject == null || currentProject.getId() == null) {
             return;
@@ -165,7 +218,7 @@ public class ProjectDetailActivity extends Activity {
     private int countDone(List<Task> tasks) {
         int count = 0;
         for (Task task : tasks) {
-            if (Task.STATUS_DONE.equals(task.getStatus())) {
+            if ("Hoàn thành".equals(task.getStatus())) {
                 count++;
             }
         }
@@ -180,23 +233,23 @@ public class ProjectDetailActivity extends Activity {
     }
 
     private int badgeBackground(String status) {
-        if (Task.STATUS_DONE.equals(status)) {
+        if ("Hoàn thành".equals(status)) {
             return R.drawable.bg_badge_green;
         }
-        if (Task.STATUS_IN_PROGRESS.equals(status)) {
+        if ("Đang làm".equals(status)) {
             return R.drawable.bg_badge_yellow;
         }
         return R.drawable.bg_badge_blue;
     }
 
     private int badgeColor(String status) {
-        if (Task.STATUS_DONE.equals(status)) {
+        if ("Hoàn thành".equals(status)) {
             return Color.rgb(33, 181, 127);
         }
-        if (Task.STATUS_IN_PROGRESS.equals(status)) {
+        if ("Đang làm".equals(status)) {
             return Color.rgb(239, 173, 68);
         }
-        return Color.rgb(34, 197, 94);
+        return Color.rgb(93, 95, 239);
     }
 
     private String valueOrDefault(String value, String defaultValue) {
