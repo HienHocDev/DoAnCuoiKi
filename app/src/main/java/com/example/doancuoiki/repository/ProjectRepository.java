@@ -4,6 +4,7 @@ import com.example.doancuoiki.model.Project;
 import com.example.doancuoiki.utils.DateUtils;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.ArrayList;
@@ -86,6 +87,32 @@ public class ProjectRepository {
         db.collection(COLLECTION_PROJECTS)
                 .document(projectId)
                 .update("progress", progress)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onError);
+    }
+
+    public void getProjectsOwnedBy(String userId, ProjectListCallback callback) {
+        db.collection(COLLECTION_PROJECTS)
+                .whereEqualTo("ownerId", userId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<Project> projects = new ArrayList<>();
+                    for (DocumentSnapshot document : snapshot.getDocuments()) {
+                        Project project = document.toObject(Project.class);
+                        if (project != null) {
+                            project.setId(document.getId());
+                            projects.add(project);
+                        }
+                    }
+                    callback.onSuccess(projects);
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+    public void addMember(String projectId, String userId, SimpleCallback callback) {
+        db.collection(COLLECTION_PROJECTS)
+                .document(projectId)
+                .update("members", FieldValue.arrayUnion(userId))
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onError);
     }

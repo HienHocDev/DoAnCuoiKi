@@ -1,37 +1,49 @@
 package com.example.doancuoiki;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.example.doancuoiki.model.Project;
 import com.example.doancuoiki.model.Task;
+import com.example.doancuoiki.model.User;
 import com.example.doancuoiki.repository.ProjectRepository;
 import com.example.doancuoiki.repository.TaskRepository;
+import com.example.doancuoiki.repository.UserRepository;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ProjectDetailActivity extends Activity {
     private final ProjectRepository projectRepository = new ProjectRepository();
     private final TaskRepository taskRepository = new TaskRepository();
+    private final UserRepository userRepository = new UserRepository();
 
     private TextView titleText;
     private TextView descriptionText;
     private TextView dateText;
+    private TextView ownerNoticeText;
     private TextView totalTaskText;
     private TextView doneTaskText;
     private TextView progressText;
+    private LinearLayout memberList;
     private LinearLayout taskList;
-
-    // Khai báo thêm 2 biến điều khiển nút bấm Sửa và Xóa
-    private android.view.View btnEdit;
-    private android.view.View btnDelete;
+    private LinearLayout ownerActions;
+    private View deleteButton;
 
     private String projectId;
+    private String currentUserId = "";
     private Project currentProject;
+    private final List<User> displayedMembers = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,16 +51,16 @@ public class ProjectDetailActivity extends Activity {
         setContentView(R.layout.activity_project_detail);
 
         bindViews();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = user == null ? "" : user.getUid();
         projectId = getIntent().getStringExtra(ProjectsActivity.EXTRA_PROJECT_ID);
 
-        // Cấu hình sự kiện cho các nút bấm
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+        findViewById(R.id.btnAddMember).setOnClickListener(v -> showAddMemberDialog());
+        findViewById(R.id.btnAddProjectTask).setOnClickListener(v -> openAddTask());
+        deleteButton.setOnClickListener(v -> confirmDeleteProject());
         findViewById(R.id.btnOpenReport).setOnClickListener(v ->
                 NavigationUtils.open(this, ReportActivity.class));
-
-        // Gắn sự kiện click cho nút Sửa và Xóa dự án vừa thêm
-        btnEdit.setOnClickListener(v -> openEditProject());
-        btnDelete.setOnClickListener(v -> confirmDeleteProject());
 
         loadProject();
     }
@@ -56,7 +68,7 @@ public class ProjectDetailActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        if (taskList != null && currentProject != null) {
+        if (currentProject != null) {
             loadProjectTasks();
         }
     }
@@ -65,14 +77,14 @@ public class ProjectDetailActivity extends Activity {
         titleText = findViewById(R.id.txtProjectTitle);
         descriptionText = findViewById(R.id.txtProjectDescription);
         dateText = findViewById(R.id.txtProjectDate);
+        ownerNoticeText = findViewById(R.id.txtOwnerNotice);
         totalTaskText = findViewById(R.id.txtProjectTaskCount);
         doneTaskText = findViewById(R.id.txtProjectDoneCount);
         progressText = findViewById(R.id.txtProjectProgress);
+        memberList = findViewById(R.id.projectMemberList);
         taskList = findViewById(R.id.projectTaskList);
-
-        // Ánh xạ id nút bấm từ layout XML
-        btnEdit = findViewById(R.id.btnEditProject);
-        btnDelete = findViewById(R.id.btnDeleteProject);
+        ownerActions = findViewById(R.id.ownerActions);
+        deleteButton = findViewById(R.id.btnDeleteProject);
     }
 
     private void loadProject() {
@@ -85,7 +97,8 @@ public class ProjectDetailActivity extends Activity {
             @Override
             public void onSuccess(Project project) {
                 currentProject = project;
-                renderProject(project);
+                renderProject();
+                loadMembers();
                 loadProjectTasks();
             }
 
@@ -97,30 +110,162 @@ public class ProjectDetailActivity extends Activity {
         });
     }
 
+    private void renderProject() {
+        titleText.setText(valueOrDefault(currentProject.getName(), "Chi tiết dự án"));
+        descriptionText.setText(valueOrDefault(currentProject.getDescription(), "Chưa có mô tả"));
+        dateText.setText("Từ " + valueOrDefault(currentProject.getStartDate(), "--")
+                + " đến " + valueOrDefault(currentProject.getEndDate(), "--"));
+
+        boolean isOwner = isCurrentUserOwner();
+        ownerActions.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+        deleteButton.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+        ownerNoticeText.setText(isOwner
+                ? "Bạn là chủ dự án và có quyền thêm thành viên, giao công việc."
+                : "Bạn là thành viên dự án. Bạn chỉ có thể cập nhật trạng thái việc được giao.");
+    }
+
+    private void loadMembers() {
+        List<String> ids = currentProject.getMembers();
+        if (ids == null) {
+            ids = new ArrayList<>();
+        }
+        userRepository.getUsersByIds(ids, new UserRepository.UserListCallback() {
+            @Override
+            public void onSuccess(List<User> users) {
+                renderMembers(users);
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                renderMembers(Collections.emptyList());
+            }
+        });
+    }
+
+    private void renderMembers(List<User> users) {
+        displayedMembers.clear();
+        displayedMembers.addAll(users);
+        memberList.removeAllViews();
+        if (users.isEmpty()) {
+            memberList.addView(ViewFactory.notificationCard(
+                    this, "Chưa tải được thành viên", "Danh sách thành viên đang trống.", ""));
+            return;
+        }
+
+        for (User user : users) {
+            String role = user.getId().equals(currentProject.getOwnerId())
+                    ? "Chủ dự án" : "Thành viên";
+            memberList.addView(ViewFactory.notificationCard(
+                    this,
+                    valueOrDefault(user.getName(), valueOrDefault(user.getEmail(), "Thành viên")),
+                    valueOrDefault(user.getEmail(), user.getId()),
+                    role
+            ));
+        }
+    }
+
+    private void showAddMemberDialog() {
+        if (!isCurrentUserOwner()) {
+            NavigationUtils.showMessage(this, "Chỉ chủ dự án được thêm thành viên");
+            return;
+        }
+
+        EditText input = new EditText(this);
+        input.setHint("Email hoặc UID tài khoản");
+        input.setSingleLine(true);
+        int padding = Math.round(20 * getResources().getDisplayMetrics().density);
+        input.setPadding(padding, padding / 2, padding, padding / 2);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Thêm thành viên")
+                .setMessage("Thành viên phải đăng ký tài khoản trong ứng dụng.")
+                .setView(input)
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Thêm", (dialog, which) ->
+                        findAndAddMember(input.getText().toString()))
+                .show();
+    }
+
+    private void findAndAddMember(String emailOrUid) {
+        userRepository.findUser(emailOrUid, new UserRepository.UserCallback() {
+            @Override
+            public void onSuccess(User user) {
+                if (currentProject.getMembers() != null
+                        && currentProject.getMembers().contains(user.getId())) {
+                    NavigationUtils.showMessage(ProjectDetailActivity.this,
+                            "Người dùng đã có trong dự án");
+                    return;
+                }
+                projectRepository.addMember(projectId, user.getId(),
+                        new ProjectRepository.SimpleCallback() {
+                            @Override
+                            public void onSuccess() {
+                                if (currentProject.getMembers() == null) {
+                                    currentProject.setMembers(new ArrayList<>());
+                                }
+                                if (!currentProject.getMembers().contains(user.getId())) {
+                                    currentProject.getMembers().add(user.getId());
+                                }
+                                if (!containsDisplayedMember(user.getId())) {
+                                    displayedMembers.add(user);
+                                }
+                                renderMembers(new ArrayList<>(displayedMembers));
+                                NavigationUtils.showMessage(ProjectDetailActivity.this,
+                                        "Đã thêm thành viên");
+                            }
+
+                            @Override
+                            public void onError(Exception exception) {
+                                NavigationUtils.showMessage(ProjectDetailActivity.this,
+                                        "Không thêm được thành viên");
+                            }
+                        });
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                NavigationUtils.showMessage(ProjectDetailActivity.this,
+                        valueOrDefault(exception.getMessage(), "Không tìm thấy tài khoản"));
+            }
+        });
+    }
+
+    private boolean containsDisplayedMember(String userId) {
+        for (User member : displayedMembers) {
+            if (userId.equals(member.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void openAddTask() {
+        if (!isCurrentUserOwner()) {
+            NavigationUtils.showMessage(this, "Chỉ chủ dự án được giao công việc");
+            return;
+        }
+        Intent intent = new Intent(this, AddTaskActivity.class);
+        intent.putExtra(AddTaskActivity.EXTRA_PROJECT_ID, projectId);
+        startActivity(intent);
+    }
+
     private void loadProjectTasks() {
         taskRepository.getTasksByProject(currentProject.getId(), new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
-                renderTasks(tasks);
+                renderTasks(visibleTasksForCurrentUser(tasks));
                 updateProjectProgressIfNeeded(tasks);
             }
 
             @Override
             public void onError(Exception exception) {
-                renderTasks(java.util.Collections.emptyList());
+                renderTasks(Collections.emptyList());
             }
         });
     }
 
-    private void renderProject(Project project) {
-        titleText.setText(valueOrDefault(project.getName(), "Chi tiết dự án"));
-        descriptionText.setText(valueOrDefault(project.getDescription(), "Chưa có mô tả"));
-        dateText.setText("Từ " + valueOrDefault(project.getStartDate(), "--") + " đến " + valueOrDefault(project.getEndDate(), "--"));
-    }
-
     private void renderTasks(List<Task> tasks) {
         taskList.removeAllViews();
-
         int total = tasks.size();
         int done = countDone(tasks);
         int progress = percent(done, total);
@@ -130,15 +275,17 @@ public class ProjectDetailActivity extends Activity {
         progressText.setText(progress + "%\nTiến độ");
 
         if (tasks.isEmpty()) {
-            taskList.addView(ViewFactory.notificationCard(this, "Chưa có công việc", "Dự án này chưa có task nào", ""));
+            taskList.addView(ViewFactory.notificationCard(
+                    this, "Chưa có công việc", "Chủ dự án chưa giao công việc nào.", ""));
             return;
         }
 
         for (Task task : tasks) {
-            android.view.View card = ViewFactory.taskCard(
+            View card = ViewFactory.taskCard(
                     this,
                     task.getTitle(),
-                    valueOrDefault(task.getDueDate(), "Chưa có hạn") + " - " + valueOrDefault(task.getAssigneeName(), "Chưa phân công"),
+                    valueOrDefault(task.getDueDate(), "Chưa có hạn") + " - "
+                            + valueOrDefault(task.getAssigneeName(), "Chưa phân công"),
                     task.getStatus(),
                     badgeBackground(task.getStatus()),
                     badgeColor(task.getStatus())
@@ -154,71 +301,76 @@ public class ProjectDetailActivity extends Activity {
         startActivity(intent);
     }
 
-    // Hàm xử lý hiển thị hộp thoại xác nhận xóa dự án
     private void confirmDeleteProject() {
-        if (currentProject == null) return;
-
-        new android.app.AlertDialog.Builder(this)
+        if (!isCurrentUserOwner()) {
+            return;
+        }
+        new AlertDialog.Builder(this)
                 .setTitle("Xóa dự án")
-                .setMessage("Bạn có chắc chắn muốn xóa dự án \"" + currentProject.getName() + "\" không? Toàn bộ các công việc bên trong cũng sẽ bị gỡ bỏ.")
-                .setPositiveButton("Xóa", (dialog, which) -> {
-                    projectRepository.deleteProject(projectId, new ProjectRepository.SimpleCallback() {
-                        @Override
-                        public void onSuccess() {
-                            NavigationUtils.showMessage(ProjectDetailActivity.this, "Đã xóa dự án thành công");
-                            finish(); // Đóng màn hình chi tiết, tự động quay trở lại danh sách
-                        }
-
-                        @Override
-                        public void onError(Exception exception) {
-                            NavigationUtils.showMessage(ProjectDetailActivity.this, "Xóa thất bại: " + exception.getMessage());
-                        }
-                    });
-                })
+                .setMessage("Bạn có chắc muốn xóa dự án này không?")
                 .setNegativeButton("Hủy", null)
+                .setPositiveButton("Xóa", (dialog, which) ->
+                        projectRepository.deleteProject(projectId,
+                                new ProjectRepository.SimpleCallback() {
+                                    @Override
+                                    public void onSuccess() {
+                                        NavigationUtils.showMessage(ProjectDetailActivity.this,
+                                                "Đã xóa dự án");
+                                        finish();
+                                    }
+
+                                    @Override
+                                    public void onError(Exception exception) {
+                                        NavigationUtils.showMessage(ProjectDetailActivity.this,
+                                                "Xóa dự án thất bại");
+                                    }
+                                }))
                 .show();
     }
 
-    // Hàm xử lý đóng gói thông tin hiện tại và gửi sang AddProjectActivity để chỉnh sửa
-    private void openEditProject() {
-        if (currentProject == null) return;
-
-        Intent intent = new Intent(this, AddProjectActivity.class);
-        intent.putExtra("isEditMode", true);
-        intent.putExtra(ProjectsActivity.EXTRA_PROJECT_ID, currentProject.getId());
-        intent.putExtra("projectName", currentProject.getName());
-        intent.putExtra("projectDesc", currentProject.getDescription());
-        intent.putExtra("startDate", currentProject.getStartDate());
-        intent.putExtra("endDate", currentProject.getEndDate());
-        startActivity(intent);
-    }
-
     private void updateProjectProgressIfNeeded(List<Task> tasks) {
-        if (currentProject == null || currentProject.getId() == null) {
+        if (currentProject == null || currentProject.getId() == null || !isCurrentUserOwner()) {
             return;
         }
-
         int progress = percent(countDone(tasks), tasks.size());
         if (progress == currentProject.getProgress()) {
             return;
         }
-
         currentProject.setProgress(progress);
-        projectRepository.updateProgress(currentProject.getId(), progress, new ProjectRepository.SimpleCallback() {
-            @Override
-            public void onSuccess() {
-            }
+        projectRepository.updateProgress(currentProject.getId(), progress,
+                new ProjectRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                    }
 
-            @Override
-            public void onError(Exception exception) {
+                    @Override
+                    public void onError(Exception exception) {
+                    }
+                });
+    }
+
+    private List<Task> visibleTasksForCurrentUser(List<Task> tasks) {
+        if (isCurrentUserOwner()) {
+            return tasks;
+        }
+        List<Task> visibleTasks = new ArrayList<>();
+        for (Task task : tasks) {
+            if (currentUserId.equals(task.getAssigneeId())) {
+                visibleTasks.add(task);
             }
-        });
+        }
+        return visibleTasks;
+    }
+
+    private boolean isCurrentUserOwner() {
+        return currentProject != null
+                && currentUserId.equals(currentProject.getOwnerId());
     }
 
     private int countDone(List<Task> tasks) {
         int count = 0;
         for (Task task : tasks) {
-            if ("Hoàn thành".equals(task.getStatus())) {
+            if (Task.STATUS_DONE.equals(task.getStatus())) {
                 count++;
             }
         }
@@ -226,44 +378,41 @@ public class ProjectDetailActivity extends Activity {
     }
 
     private int percent(int value, int total) {
-        if (total == 0) {
-            return 0;
-        }
-        return Math.round(value * 100f / total);
+        return total == 0 ? 0 : Math.round(value * 100f / total);
     }
 
     private int badgeBackground(String status) {
-        if ("Hoàn thành".equals(status)) {
+        if (Task.STATUS_DONE.equals(status)) {
             return R.drawable.bg_badge_green;
         }
-        if ("Đang làm".equals(status)) {
+        if (Task.STATUS_IN_PROGRESS.equals(status)) {
             return R.drawable.bg_badge_yellow;
         }
         return R.drawable.bg_badge_blue;
     }
 
     private int badgeColor(String status) {
-        if ("Hoàn thành".equals(status)) {
+        if (Task.STATUS_DONE.equals(status)) {
             return Color.rgb(33, 181, 127);
         }
-        if ("Đang làm".equals(status)) {
+        if (Task.STATUS_IN_PROGRESS.equals(status)) {
             return Color.rgb(239, 173, 68);
         }
-        return Color.rgb(93, 95, 239);
+        return Color.rgb(34, 197, 94);
     }
 
     private String valueOrDefault(String value, String defaultValue) {
-        if (value == null || value.trim().isEmpty()) {
-            return defaultValue;
-        }
-        return value.trim();
+        return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
 
     private void renderMissingProject() {
         currentProject = null;
         titleText.setText("Không tìm thấy dự án");
-        descriptionText.setText("Dự án này chưa có dữ liệu trên Firestore hoặc đã bị xóa.");
+        descriptionText.setText("Dự án không tồn tại hoặc đã bị xóa.");
         dateText.setText("Từ -- đến --");
-        renderTasks(java.util.Collections.emptyList());
+        ownerActions.setVisibility(View.GONE);
+        deleteButton.setVisibility(View.GONE);
+        renderMembers(Collections.emptyList());
+        renderTasks(Collections.emptyList());
     }
 }

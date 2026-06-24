@@ -59,6 +59,39 @@ public class UserRepository {
                 .addOnFailureListener(callback::onError);
     }
 
+    public void findUser(String emailOrUid, UserCallback callback) {
+        String value = emailOrUid == null ? "" : emailOrUid.trim();
+        if (value.isEmpty()) {
+            callback.onError(new IllegalArgumentException("Vui lòng nhập email hoặc UID"));
+            return;
+        }
+
+        if (value.contains("@")) {
+            db.collection(COLLECTION_USERS)
+                    .whereEqualTo("email", value)
+                    .limit(1)
+                    .get()
+                    .addOnSuccessListener(snapshot -> {
+                        if (snapshot.isEmpty()) {
+                            callback.onError(new IllegalStateException("Không tìm thấy tài khoản"));
+                            return;
+                        }
+                        DocumentSnapshot document = snapshot.getDocuments().get(0);
+                        User user = document.toObject(User.class);
+                        if (user == null) {
+                            callback.onError(new IllegalStateException("Không tìm thấy tài khoản"));
+                            return;
+                        }
+                        user.setId(document.getId());
+                        callback.onSuccess(user);
+                    })
+                    .addOnFailureListener(callback::onError);
+            return;
+        }
+
+        getUser(value, callback);
+    }
+
     // NÂNG CẤP CHỐNG LỖI NOT_FOUND: Đổi sang dùng .set và SetOptions.merge()
     public void updateName(String userId, String name, SimpleCallback callback) {
         Map<String, Object> data = new HashMap<>();

@@ -33,6 +33,16 @@
             android:textColor="#7D8496"
             android:textSize="13sp" />
 
+        <TextView
+            android:id="@+id/txtOwnerNotice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_soft_primary"
+            android:padding="12dp"
+            android:textColor="#15803D"
+            android:textSize="13sp" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="94dp"
@@ -57,6 +67,42 @@
 
         <TextView
             style="@style/SectionTitle"
+            android:text="Thành viên dự án" />
+
+        <LinearLayout
+            android:id="@+id/projectMemberList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <LinearLayout
+            android:id="@+id/ownerActions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnAddMember"
+                style="@style/PrimaryButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="0dp"
+                android:layout_marginEnd="6dp"
+                android:text="+ Thành viên" />
+
+            <Button
+                android:id="@+id/btnAddProjectTask"
+                style="@style/PrimaryButton"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="0dp"
+                android:layout_marginStart="6dp"
+                android:text="+ Công việc" />
+        </LinearLayout>
+
+        <TextView
+            style="@style/SectionTitle"
             android:text="Danh sách công việc" />
 
         <LinearLayout
@@ -65,37 +111,19 @@
             android:layout_height="wrap_content"
             android:orientation="vertical" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnEditProject"
-                style="@style/PrimaryButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_marginEnd="6dp"
-                android:layout_marginTop="0dp"
-                android:backgroundTint="#5D5FEF"
-                android:text="Sửa dự án" />
-
-            <Button
-                android:id="@+id/btnDeleteProject"
-                style="@style/PrimaryButton"
-                android:layout_width="0dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:layout_marginTop="0dp"
-                android:backgroundTint="#FF4D4D"
-                android:text="Xóa dự án" />
-        </LinearLayout>
-
         <Button
             android:id="@+id/btnOpenReport"
             style="@style/PrimaryButton"
             android:text="Xem báo cáo tiến độ" />
 
+        <Button
+            android:id="@+id/btnDeleteProject"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_delete"
+            android:text="Xóa dự án"
+            android:textAllCaps="false"
+            android:textColor="#E74C3C" />
     </LinearLayout>
 </ScrollView>

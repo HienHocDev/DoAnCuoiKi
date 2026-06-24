@@ -12,12 +12,11 @@
 
         <TextView
             style="@style/ScreenTitle"
-            android:text="Thêm dự án"
-            />
+            android:text="Thêm dự án" />
 
         <TextView
             style="@style/ScreenSubtitle"
-            android:text="Tạo dự án mới và thêm thành viên bằng email" />
+            android:text="Bạn sẽ là chủ dự án và có thể thêm thành viên sau" />
 
         <EditText
             android:id="@+id/edtProjectName"
@@ -44,17 +43,12 @@
             android:focusable="false"
             android:hint="Ngày kết thúc" />
 
-        <EditText
-            android:id="@+id/edtMembers"
-            style="@style/FormInput"
-            android:hint="Email hoặc UID thành viên, cách nhau bằng dấu phẩy" />
-
         <TextView
             android:id="@+id/txtMemberHint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="Bạn tạo dự án sẽ tự động là thành viên. Muốn bạn khác thấy dự án, nhập email tài khoản đã đăng ký Firebase."
+            android:text="Sau khi tạo, mở dự án để thêm thành viên và giao công việc."
             android:textColor="#7D8496"
             android:textSize="12sp" />
 
@@ -70,7 +64,6 @@
             android:id="@+id/btnCreateProject"
             style="@style/PrimaryButton"
             android:layout_marginTop="28dp"
-            android:text="Tạo dự án"
-            />
+            android:text="Tạo dự án" />
     </LinearLayout>
 </ScrollView>

@@ -1,71 +1,74 @@
 package com.example.doancuoiki;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.EditText;
+import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.example.doancuoiki.model.Task;
 import com.example.doancuoiki.repository.TaskRepository;
-import com.example.doancuoiki.utils.DateUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.List;
 
 public class TaskDetailActivity extends Activity {
     public static final String EXTRA_TASK_ID = "taskId";
 
     private final TaskRepository taskRepository = new TaskRepository();
 
-    private EditText titleInput;
-    private EditText descriptionInput;
-    private EditText dueDateInput;
+    private TextView titleText;
+    private TextView descriptionText;
     private TextView projectText;
     private TextView assigneeText;
+    private TextView dueDateText;
+    private TextView priorityText;
+    private TextView permissionText;
     private Spinner statusSpinner;
-    private Spinner prioritySpinner;
+    private Button saveButton;
     private Task currentTask;
+    private String currentUserId = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_task_detail);
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        currentUserId = user == null ? "" : user.getUid();
         bindViews();
-        setupSpinners();
         setupActions();
         loadTask();
     }
 
     private void bindViews() {
-        titleInput = findViewById(R.id.edtTaskTitle);
-        descriptionInput = findViewById(R.id.edtTaskDescription);
-        dueDateInput = findViewById(R.id.edtTaskDueDate);
+        titleText = findViewById(R.id.txtTaskTitle);
+        descriptionText = findViewById(R.id.txtTaskDescription);
         projectText = findViewById(R.id.txtTaskProject);
         assigneeText = findViewById(R.id.txtTaskAssignee);
+        dueDateText = findViewById(R.id.txtTaskDueDate);
+        priorityText = findViewById(R.id.txtTaskPriority);
+        permissionText = findViewById(R.id.txtTaskPermission);
         statusSpinner = findViewById(R.id.spinnerStatus);
-        prioritySpinner = findViewById(R.id.spinnerPriority);
+        saveButton = findViewById(R.id.btnSaveTask);
+
+        statusSpinner.setAdapter(new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_spinner_dropdown_item,
+                Arrays.asList(
+                        Task.STATUS_NOT_STARTED,
+                        Task.STATUS_IN_PROGRESS,
+                        Task.STATUS_DONE
+                )
+        ));
     }
 
     private void setupActions() {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnSaveTask).setOnClickListener(v -> updateTask());
-        findViewById(R.id.btnDeleteTask).setOnClickListener(v -> confirmDelete());
-        dueDateInput.setOnClickListener(v -> showDatePicker());
-    }
-
-    private void setupSpinners() {
-        setSpinnerItems(statusSpinner, Arrays.asList(
-                Task.STATUS_NOT_STARTED,
-                Task.STATUS_IN_PROGRESS,
-                Task.STATUS_DONE
-        ));
-        setSpinnerItems(prioritySpinner, Arrays.asList("Thấp", "Trung bình", "Cao"));
+        saveButton.setOnClickListener(v -> updateStatus());
     }
 
     private void loadTask() {
@@ -85,123 +88,72 @@ public class TaskDetailActivity extends Activity {
 
             @Override
             public void onError(Exception exception) {
-                NavigationUtils.showMessage(TaskDetailActivity.this, "Không tải được công việc");
+                NavigationUtils.showMessage(TaskDetailActivity.this,
+                        "Không tải được công việc");
                 finish();
             }
         });
     }
 
     private void renderTask() {
-        titleInput.setText(valueOrDefault(currentTask.getTitle(), ""));
-        descriptionInput.setText(valueOrDefault(currentTask.getDescription(), ""));
-        dueDateInput.setText(valueOrDefault(currentTask.getDueDate(), ""));
-        projectText.setText("Dự án: " + valueOrDefault(currentTask.getProjectName(), "Chưa chọn dự án"));
-        assigneeText.setText("Người thực hiện: " + valueOrDefault(currentTask.getAssigneeName(), "Chưa phân công"));
-        selectSpinnerValue(statusSpinner, currentTask.getStatus());
-        selectSpinnerValue(prioritySpinner, currentTask.getPriority());
+        titleText.setText(valueOrDefault(currentTask.getTitle(), "Công việc"));
+        descriptionText.setText(valueOrDefault(currentTask.getDescription(), "Chưa có mô tả"));
+        projectText.setText("Dự án: "
+                + valueOrDefault(currentTask.getProjectName(), "Chưa xác định"));
+        assigneeText.setText("Người thực hiện: "
+                + valueOrDefault(currentTask.getAssigneeName(), "Chưa phân công"));
+        dueDateText.setText("Hạn hoàn thành: "
+                + valueOrDefault(currentTask.getDueDate(), "Chưa có hạn"));
+        priorityText.setText("Độ ưu tiên: "
+                + valueOrDefault(currentTask.getPriority(), "Trung bình"));
+        selectSpinnerValue(currentTask.getStatus());
+
+        boolean isAssignee = currentUserId.equals(currentTask.getAssigneeId());
+        statusSpinner.setEnabled(isAssignee);
+        saveButton.setVisibility(isAssignee ? View.VISIBLE : View.GONE);
+        permissionText.setText(isAssignee
+                ? "Bạn có thể cập nhật trạng thái công việc này."
+                : "Chỉ thành viên được giao việc mới có thể cập nhật trạng thái.");
     }
 
-    private void updateTask() {
-        if (currentTask == null) {
+    private void updateStatus() {
+        if (currentTask == null || !currentUserId.equals(currentTask.getAssigneeId())) {
+            NavigationUtils.showMessage(this,
+                    "Bạn không có quyền cập nhật công việc này");
             return;
         }
 
-        String title = titleInput.getText().toString().trim();
-        if (title.isEmpty()) {
-            NavigationUtils.showMessage(this, "Vui lòng nhập tên công việc");
-            return;
-        }
+        String status = statusSpinner.getSelectedItem().toString();
+        taskRepository.updateTaskStatus(currentTask.getId(), status,
+                new TaskRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        NavigationUtils.showMessage(TaskDetailActivity.this,
+                                "Đã cập nhật trạng thái");
+                        finish();
+                    }
 
-        currentTask.setTitle(title);
-        currentTask.setDescription(descriptionInput.getText().toString().trim());
-        currentTask.setDueDate(valueOrDefault(dueDateInput.getText().toString(), "Chưa có hạn"));
-        currentTask.setStatus(selectedSpinnerText(statusSpinner));
-        currentTask.setPriority(selectedSpinnerText(prioritySpinner));
-
-        taskRepository.updateTask(currentTask, new TaskRepository.SimpleCallback() {
-            @Override
-            public void onSuccess() {
-                NavigationUtils.showMessage(TaskDetailActivity.this, "Đã cập nhật công việc");
-                finish();
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                NavigationUtils.showMessage(TaskDetailActivity.this, "Cập nhật thất bại");
-            }
-        });
+                    @Override
+                    public void onError(Exception exception) {
+                        NavigationUtils.showMessage(TaskDetailActivity.this,
+                                "Cập nhật trạng thái thất bại");
+                    }
+                });
     }
 
-    private void confirmDelete() {
-        if (currentTask == null) {
-            return;
-        }
-
-        new AlertDialog.Builder(this)
-                .setTitle("Xóa công việc")
-                .setMessage("Bạn có chắc muốn xóa công việc này không?")
-                .setNegativeButton("Hủy", null)
-                .setPositiveButton("Xóa", (dialog, which) -> deleteTask())
-                .show();
-    }
-
-    private void deleteTask() {
-        taskRepository.deleteTask(currentTask.getId(), new TaskRepository.SimpleCallback() {
-            @Override
-            public void onSuccess() {
-                NavigationUtils.showMessage(TaskDetailActivity.this, "Đã xóa công việc");
-                finish();
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                NavigationUtils.showMessage(TaskDetailActivity.this, "Xóa công việc thất bại");
-            }
-        });
-    }
-
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        new DatePickerDialog(
-                this,
-                (view, year, month, dayOfMonth) ->
-                        dueDateInput.setText(DateUtils.fromCalendarDate(year, month, dayOfMonth)),
-                calendar.get(Calendar.YEAR),
-                calendar.get(Calendar.MONTH),
-                calendar.get(Calendar.DAY_OF_MONTH)
-        ).show();
-    }
-
-    private void setSpinnerItems(Spinner spinner, List<String> items) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                items
-        );
-        spinner.setAdapter(adapter);
-    }
-
-    private void selectSpinnerValue(Spinner spinner, String value) {
+    private void selectSpinnerValue(String value) {
         if (value == null) {
             return;
         }
-        for (int i = 0; i < spinner.getCount(); i++) {
-            if (value.equals(spinner.getItemAtPosition(i).toString())) {
-                spinner.setSelection(i);
+        for (int i = 0; i < statusSpinner.getCount(); i++) {
+            if (value.equals(statusSpinner.getItemAtPosition(i).toString())) {
+                statusSpinner.setSelection(i);
                 return;
             }
         }
     }
 
-    private String selectedSpinnerText(Spinner spinner) {
-        Object item = spinner.getSelectedItem();
-        return item == null ? "" : item.toString();
-    }
-
     private String valueOrDefault(String value, String defaultValue) {
-        if (value == null || value.trim().isEmpty()) {
-            return defaultValue;
-        }
-        return value.trim();
+        return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
 }

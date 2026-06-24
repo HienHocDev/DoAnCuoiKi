@@ -116,6 +116,24 @@ public class TaskRepository {
                 .addOnFailureListener(callback::onError);
     }
 
+    public void getAssignedTasks(String userId, TaskListCallback callback) {
+        db.collection(COLLECTION_TASKS)
+                .whereEqualTo("assigneeId", userId)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<Task> tasks = new ArrayList<>();
+                    for (DocumentSnapshot document : snapshot.getDocuments()) {
+                        Task task = document.toObject(Task.class);
+                        if (task != null) {
+                            task.setId(document.getId());
+                            tasks.add(task);
+                        }
+                    }
+                    callback.onSuccess(tasks);
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
     public void updateTaskStatus(String taskId, String status, SimpleCallback callback) {
         db.collection(COLLECTION_TASKS)
                 .document(taskId)

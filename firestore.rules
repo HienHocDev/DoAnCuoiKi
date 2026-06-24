@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function project(projectId) {
+      return get(/databases/$(database)/documents/projects/$(projectId)).data;
+    }
+
+    function isProjectMember(projectId) {
+      return signedIn() && request.auth.uid in project(projectId).members;
+    }
+
+    function isProjectOwner(projectId) {
+      return signedIn() && project(projectId).ownerId == request.auth.uid;
+    }
+
+    match /users/{userId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
+    match /projects/{projectId} {
+      allow read: if signedIn() && request.auth.uid in resource.data.members;
+
+      allow create: if signedIn()
+        && request.resource.data.ownerId == request.auth.uid
+        && request.auth.uid in request.resource.data.members;
+
+      allow update, delete: if signedIn()
+        && resource.data.ownerId == request.auth.uid;
+    }
+
+    match /tasks/{taskId} {
+      allow read: if isProjectMember(resource.data.projectId);
+
+      allow create: if isProjectOwner(request.resource.data.projectId)
+        && request.resource.data.creatorId == request.auth.uid
+        && request.resource.data.assigneeId
+          in project(request.resource.data.projectId).members;
+
+      allow update: if isProjectOwner(resource.data.projectId)
+        || (
+          signedIn()
+          && resource.data.assigneeId == request.auth.uid
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['status'])
+        );
+
+      allow delete: if isProjectOwner(resource.data.projectId);
+    }
+
+    match /notifications/{notificationId} {
+      allow read, update: if signedIn()
+        && request.auth.uid == resource.data.userId;
+      allow create: if signedIn()
+        && request.auth.uid == request.resource.data.userId;
+      allow delete: if false;
+    }
+  }
+}
