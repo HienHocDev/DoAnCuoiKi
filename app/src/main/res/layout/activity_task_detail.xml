@@ -11,30 +11,31 @@
             style="@style/BackButton" />
 
         <TextView
-            style="@style/ScreenTitle"
-            android:text="Chi tiết công việc"
-            />
+            style="@style/ScreenSubtitle"
+            android:text="Chi tiết công việc" />
 
         <TextView
-            style="@style/ScreenSubtitle"
-            android:text="Cập nhật trạng thái và hạn hoàn thành" />
+            android:id="@+id/txtTaskTitle"
+            style="@style/ScreenTitle"
+            android:text="Công việc" />
 
-        <EditText
-            android:id="@+id/edtTaskTitle"
-            style="@style/FormInput"
-            android:hint="Tên công việc" />
-
-        <EditText
-            android:id="@+id/edtTaskDescription"
-            style="@style/FormInput"
-            android:hint="Mô tả công việc"
-            android:minLines="3" />
+        <TextView
+            android:id="@+id/txtTaskDescription"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_card"
+            android:minHeight="90dp"
+            android:padding="16dp"
+            android:text="Mô tả công việc"
+            android:textColor="#222632"
+            android:textSize="15sp" />
 
         <TextView
             android:id="@+id/txtTaskProject"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
+            android:layout_marginTop="12dp"
             android:background="@drawable/bg_input"
             android:padding="14dp"
             android:text="Dự án"
@@ -45,7 +46,7 @@
             android:id="@+id/txtTaskAssignee"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_input"
             android:padding="14dp"
             android:text="Người thực hiện"
@@ -53,45 +54,47 @@
             android:textSize="14sp" />
 
         <TextView
+            android:id="@+id/txtTaskDueDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_input"
+            android:padding="14dp"
+            android:text="Hạn hoàn thành"
+            android:textColor="#222632"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/txtTaskPriority"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/bg_input"
+            android:padding="14dp"
+            android:text="Độ ưu tiên"
+            android:textColor="#222632"
+            android:textSize="14sp" />
+
+        <TextView
             style="@style/FieldLabel"
-            android:text="Trạng thái"
-            />
+            android:text="Trạng thái công việc" />
 
         <Spinner
             android:id="@+id/spinnerStatus"
             style="@style/FormSpinner" />
 
         <TextView
-            style="@style/FieldLabel"
-            android:text="Độ ưu tiên"
-            />
-
-        <Spinner
-            android:id="@+id/spinnerPriority"
-            style="@style/FormSpinner" />
-
-        <EditText
-            android:id="@+id/edtTaskDueDate"
-            style="@style/FormInput"
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="Hạn hoàn thành" />
+            android:id="@+id/txtTaskPermission"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textColor="#7D8496"
+            android:textSize="13sp" />
 
         <Button
             android:id="@+id/btnSaveTask"
             style="@style/PrimaryButton"
-            android:layout_marginTop="28dp"
-            android:text="Cập nhật công việc"
-            />
-
-        <Button
-            android:id="@+id/btnDeleteTask"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_delete"
-            android:text="Xóa công việc"
-            android:textAllCaps="false"
-            android:textColor="#E74C3C" />
+            android:layout_marginTop="24dp"
+            android:text="Cập nhật trạng thái" />
     </LinearLayout>
 </ScrollView>

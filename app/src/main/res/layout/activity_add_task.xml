@@ -49,15 +49,6 @@
 
         <TextView
             style="@style/FieldLabel"
-            android:text="Trạng thái"
-            />
-
-        <Spinner
-            android:id="@+id/spinnerStatus"
-            style="@style/FormSpinner" />
-
-        <TextView
-            style="@style/FieldLabel"
             android:text="Độ ưu tiên"
             />
 

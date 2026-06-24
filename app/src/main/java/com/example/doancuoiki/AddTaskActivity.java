@@ -3,6 +3,7 @@ package com.example.doancuoiki;
 import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
@@ -19,13 +20,15 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 public class AddTaskActivity extends Activity {
-    private static final String GUEST_USER_ID = "guest";
+    public static final String EXTRA_PROJECT_ID = "addTaskProjectId";
 
     private final TaskRepository taskRepository = new TaskRepository();
     private final ProjectRepository projectRepository = new ProjectRepository();
@@ -38,20 +41,32 @@ public class AddTaskActivity extends Activity {
     private EditText dueDateInput;
     private Spinner projectSpinner;
     private Spinner assigneeSpinner;
-    private Spinner statusSpinner;
     private Spinner prioritySpinner;
-    private String currentUserId = GUEST_USER_ID;
+    private String currentUserId = "";
+    private String requestedProjectId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
 
-        currentUserId = currentUserId();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null) {
+            NavigationUtils.showMessage(this, "Bạn cần đăng nhập để giao công việc");
+            finish();
+            return;
+        }
+        currentUserId = user.getUid();
+        requestedProjectId = getIntent().getStringExtra(EXTRA_PROJECT_ID);
+
         bindViews();
-        setupStaticSpinners();
+        setupSpinners();
         setupActions();
-        loadProjects();
+        if (hasRequestedProject()) {
+            loadRequestedProject();
+        } else {
+            loadOwnedProjects();
+        }
     }
 
     private void bindViews() {
@@ -60,7 +75,6 @@ public class AddTaskActivity extends Activity {
         dueDateInput = findViewById(R.id.edtTaskDueDate);
         projectSpinner = findViewById(R.id.spinnerProject);
         assigneeSpinner = findViewById(R.id.spinnerAssignee);
-        statusSpinner = findViewById(R.id.spinnerStatus);
         prioritySpinner = findViewById(R.id.spinnerPriority);
     }
 
@@ -70,7 +84,8 @@ public class AddTaskActivity extends Activity {
         dueDateInput.setOnClickListener(v -> showDatePicker());
         projectSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
-            public void onItemSelected(android.widget.AdapterView<?> parent, android.view.View view, int position, long id) {
+            public void onItemSelected(android.widget.AdapterView<?> parent, View view,
+                                       int position, long id) {
                 loadAssigneesForSelectedProject();
             }
 
@@ -80,110 +95,147 @@ public class AddTaskActivity extends Activity {
         });
     }
 
-    private void setupStaticSpinners() {
-        setSpinnerItems(statusSpinner, java.util.Arrays.asList(
-                Task.STATUS_NOT_STARTED,
-                Task.STATUS_IN_PROGRESS,
-                Task.STATUS_DONE
-        ));
-        setSpinnerItems(prioritySpinner, java.util.Arrays.asList("Thấp", "Trung bình", "Cao"));
+    private void setupSpinners() {
+        setSpinnerItems(prioritySpinner, Arrays.asList("Thấp", "Trung bình", "Cao"));
     }
 
-    private void loadProjects() {
-        setSpinnerItems(projectSpinner, java.util.Collections.singletonList("Đang tải dự án..."));
-        projectRepository.getProjectsByUser(currentUserId, new ProjectRepository.ProjectListCallback() {
-            @Override
-            public void onSuccess(List<Project> loadedProjects) {
-                projects.clear();
-                projects.addAll(loadedProjects);
+    private void loadOwnedProjects() {
+        projectSpinner.setEnabled(true);
+        projectSpinner.setAlpha(1f);
+        setSpinnerItems(projectSpinner, Collections.singletonList("Đang tải dự án..."));
+        projectRepository.getProjectsOwnedBy(currentUserId,
+                new ProjectRepository.ProjectListCallback() {
+                    @Override
+                    public void onSuccess(List<Project> loadedProjects) {
+                        projects.clear();
+                        projects.addAll(loadedProjects);
+                        if (projects.isEmpty()) {
+                            setSpinnerItems(projectSpinner,
+                                    Collections.singletonList("Bạn chưa có dự án do mình làm chủ"));
+                            setSpinnerItems(assigneeSpinner,
+                                    Collections.singletonList("Chưa có thành viên"));
+                            return;
+                        }
 
-                if (projects.isEmpty()) {
-                    setSpinnerItems(projectSpinner, java.util.Collections.singletonList("Chưa có dự án"));
-                    setFallbackAssignee();
-                    return;
-                }
+                        List<String> names = new ArrayList<>();
+                        int selectedIndex = 0;
+                        for (int i = 0; i < projects.size(); i++) {
+                            Project project = projects.get(i);
+                            names.add(valueOrDefault(project.getName(), "Dự án chưa đặt tên"));
+                            if (project.getId().equals(requestedProjectId)) {
+                                selectedIndex = i;
+                            }
+                        }
+                        setSpinnerItems(projectSpinner, names);
+                        projectSpinner.setSelection(selectedIndex);
+                    }
 
-                List<String> names = new ArrayList<>();
-                for (Project project : projects) {
-                    names.add(valueOrDefault(project.getName(), "Dự án chưa đặt tên"));
-                }
-                setSpinnerItems(projectSpinner, names);
-                loadAssigneesForSelectedProject();
-            }
+                    @Override
+                    public void onError(Exception exception) {
+                        setSpinnerItems(projectSpinner,
+                                Collections.singletonList("Không tải được dự án"));
+                    }
+                });
+    }
 
-            @Override
-            public void onError(Exception exception) {
-                setSpinnerItems(projectSpinner, java.util.Collections.singletonList("Không tải được dự án"));
-                setFallbackAssignee();
-            }
-        });
+    private void loadRequestedProject() {
+        projectSpinner.setEnabled(false);
+        projectSpinner.setAlpha(0.75f);
+        setSpinnerItems(projectSpinner, Collections.singletonList("Đang tải dự án..."));
+
+        projectRepository.getProjectById(requestedProjectId,
+                new ProjectRepository.ProjectCallback() {
+                    @Override
+                    public void onSuccess(Project project) {
+                        if (!currentUserId.equals(project.getOwnerId())) {
+                            setSpinnerItems(projectSpinner,
+                                    Collections.singletonList("Bạn không có quyền giao việc"));
+                            NavigationUtils.showMessage(AddTaskActivity.this,
+                                    "Chỉ chủ dự án được thêm công việc");
+                            return;
+                        }
+
+                        projects.clear();
+                        projects.add(project);
+                        setSpinnerItems(projectSpinner, Collections.singletonList(
+                                valueOrDefault(project.getName(), "Dự án")));
+                        projectSpinner.setSelection(0);
+                        loadAssigneesForSelectedProject();
+                    }
+
+                    @Override
+                    public void onError(Exception exception) {
+                        projects.clear();
+                        setSpinnerItems(projectSpinner,
+                                Collections.singletonList("Không tải được dự án"));
+                        NavigationUtils.showMessage(AddTaskActivity.this,
+                                "Không tìm thấy dự án cần giao việc");
+                    }
+                });
     }
 
     private void loadAssigneesForSelectedProject() {
         Project project = selectedProject();
-        if (project == null) {
-            setFallbackAssignee();
+        if (project == null || !currentUserId.equals(project.getOwnerId())) {
+            assignees.clear();
+            setSpinnerItems(assigneeSpinner, Collections.singletonList("Chưa có thành viên"));
             return;
         }
 
-        userRepository.getUsersByIds(project.getMembers(), new UserRepository.UserListCallback() {
-            @Override
-            public void onSuccess(List<User> users) {
-                assignees.clear();
-                assignees.addAll(users);
+        userRepository.getUsersByIds(project.getMembers(),
+                new UserRepository.UserListCallback() {
+                    @Override
+                    public void onSuccess(List<User> users) {
+                        assignees.clear();
+                        assignees.addAll(users);
+                        List<String> names = new ArrayList<>();
+                        for (User user : users) {
+                            names.add(valueOrDefault(user.getName(),
+                                    valueOrDefault(user.getEmail(), user.getId())));
+                        }
+                        setSpinnerItems(assigneeSpinner, names.isEmpty()
+                                ? Collections.singletonList("Chưa có thành viên") : names);
+                    }
 
-                if (assignees.isEmpty()) {
-                    setFallbackAssignee();
-                    return;
-                }
-
-                List<String> names = new ArrayList<>();
-                for (User user : assignees) {
-                    names.add(valueOrDefault(user.getName(), valueOrDefault(user.getEmail(), user.getId())));
-                }
-                setSpinnerItems(assigneeSpinner, names);
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                setFallbackAssignee();
-            }
-        });
-    }
-
-    private void setFallbackAssignee() {
-        assignees.clear();
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        String name = user != null && user.getEmail() != null ? user.getEmail() : "Người dùng hiện tại";
-        assignees.add(new User(currentUserId, name, user != null ? user.getEmail() : "", "Thành viên", "", ""));
-        setSpinnerItems(assigneeSpinner, java.util.Collections.singletonList(name));
+                    @Override
+                    public void onError(Exception exception) {
+                        assignees.clear();
+                        setSpinnerItems(assigneeSpinner,
+                                Collections.singletonList("Không tải được thành viên"));
+                    }
+                });
     }
 
     private void saveTask() {
         String title = titleInput.getText().toString().trim();
+        Project project = selectedProject();
+        User assignee = selectedAssignee();
+
         if (title.isEmpty()) {
             NavigationUtils.showMessage(this, "Vui lòng nhập tên công việc");
             return;
         }
-
-        Project project = selectedProject();
-        if (project == null) {
-            NavigationUtils.showMessage(this, "Vui lòng tạo hoặc chọn dự án trước");
+        if (project == null || !currentUserId.equals(project.getOwnerId())) {
+            NavigationUtils.showMessage(this, "Bạn không có quyền giao việc trong dự án này");
+            return;
+        }
+        if (assignee == null) {
+            NavigationUtils.showMessage(this, "Vui lòng chọn thành viên thực hiện");
             return;
         }
 
-        User assignee = selectedAssignee();
         String today = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(new Date());
         Task task = new Task(
                 null,
                 project.getId(),
-                valueOrDefault(project.getName(), "Chưa chọn dự án"),
+                valueOrDefault(project.getName(), "Dự án"),
                 title,
                 descriptionInput.getText().toString().trim(),
                 assignee.getId(),
-                valueOrDefault(assignee.getName(), valueOrDefault(assignee.getEmail(), "Chưa phân công")),
+                valueOrDefault(assignee.getName(),
+                        valueOrDefault(assignee.getEmail(), "Thành viên")),
                 currentUserId,
-                selectedSpinnerText(statusSpinner),
+                Task.STATUS_NOT_STARTED,
                 selectedSpinnerText(prioritySpinner),
                 today,
                 valueOrDefault(dueDateInput.getText().toString(), "Chưa có hạn")
@@ -192,13 +244,14 @@ public class AddTaskActivity extends Activity {
         taskRepository.addTask(task, new TaskRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
-                NavigationUtils.showMessage(AddTaskActivity.this, "Đã lưu công việc");
+                NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc");
                 finish();
             }
 
             @Override
             public void onError(Exception exception) {
-                NavigationUtils.showMessage(AddTaskActivity.this, "Chưa lưu được Firestore");
+                NavigationUtils.showMessage(AddTaskActivity.this,
+                        "Không lưu được công việc");
             }
         });
     }
@@ -207,8 +260,8 @@ public class AddTaskActivity extends Activity {
         Calendar calendar = Calendar.getInstance();
         new DatePickerDialog(
                 this,
-                (view, year, month, dayOfMonth) ->
-                        dueDateInput.setText(DateUtils.fromCalendarDate(year, month, dayOfMonth)),
+                (view, year, month, day) ->
+                        dueDateInput.setText(DateUtils.fromCalendarDate(year, month, day)),
                 calendar.get(Calendar.YEAR),
                 calendar.get(Calendar.MONTH),
                 calendar.get(Calendar.DAY_OF_MONTH)
@@ -216,28 +269,25 @@ public class AddTaskActivity extends Activity {
     }
 
     private Project selectedProject() {
-        int position = projectSpinner.getSelectedItemPosition();
-        if (position < 0 || position >= projects.size()) {
-            return null;
+        if (hasRequestedProject()) {
+            return projects.isEmpty() ? null : projects.get(0);
         }
-        return projects.get(position);
+        int position = projectSpinner.getSelectedItemPosition();
+        return position < 0 || position >= projects.size() ? null : projects.get(position);
+    }
+
+    private boolean hasRequestedProject() {
+        return requestedProjectId != null && !requestedProjectId.trim().isEmpty();
     }
 
     private User selectedAssignee() {
         int position = assigneeSpinner.getSelectedItemPosition();
-        if (position < 0 || position >= assignees.size()) {
-            return new User(currentUserId, "Người dùng hiện tại", "", "Thành viên", "", "");
-        }
-        return assignees.get(position);
+        return position < 0 || position >= assignees.size() ? null : assignees.get(position);
     }
 
     private void setSpinnerItems(Spinner spinner, List<String> items) {
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                items
-        );
-        spinner.setAdapter(adapter);
+        spinner.setAdapter(new ArrayAdapter<>(
+                this, android.R.layout.simple_spinner_dropdown_item, items));
     }
 
     private String selectedSpinnerText(Spinner spinner) {
@@ -245,18 +295,7 @@ public class AddTaskActivity extends Activity {
         return item == null ? "" : item.toString();
     }
 
-    private String currentUserId() {
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user == null) {
-            return GUEST_USER_ID;
-        }
-        return user.getUid();
-    }
-
     private String valueOrDefault(String value, String defaultValue) {
-        if (value == null || value.trim().isEmpty()) {
-            return defaultValue;
-        }
-        return value.trim();
+        return value == null || value.trim().isEmpty() ? defaultValue : value.trim();
     }
 }

@@ -6,12 +6,12 @@ public class User {
     private String email;
     private String role;
     private String avatarUrl;
-    private String createdAt;
+    private Object createdAt;
 
     public User() {
     }
 
-    public User(String id, String name, String email, String role, String avatarUrl, String createdAt) {
+    public User(String id, String name, String email, String role, String avatarUrl, Object createdAt) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -60,11 +60,11 @@ public class User {
         this.avatarUrl = avatarUrl;
     }
 
-    public String getCreatedAt() {
+    public Object getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(String createdAt) {
+    public void setCreatedAt(Object createdAt) {
         this.createdAt = createdAt;
     }
 }
