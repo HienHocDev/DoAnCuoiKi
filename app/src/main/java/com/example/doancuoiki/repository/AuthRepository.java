@@ -80,4 +80,24 @@ public class AuthRepository {
     private String now() {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
     }
+    public void changePasswordDirectly(String currentPassword, String newPassword, SimpleCallback callback) {
+        FirebaseUser user = auth.getCurrentUser();
+        if (user == null || user.getEmail() == null) {
+            callback.onError(new IllegalStateException("Người dùng chưa đăng nhập"));
+            return;
+        }
+
+        // Bước 1: Xác thực lại bằng mật khẩu hiện tại
+        com.google.firebase.auth.AuthCredential credential =
+                com.google.firebase.auth.EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
+
+        user.reauthenticate(credential)
+                .addOnSuccessListener(unused -> {
+                    // Bước 2: Xác thực thành công thì tiến hành đổi mật khẩu mới
+                    user.updatePassword(newPassword)
+                            .addOnSuccessListener(unused2 -> callback.onSuccess())
+                            .addOnFailureListener(callback::onError);
+                })
+                .addOnFailureListener(callback::onError);
+    }
 }
