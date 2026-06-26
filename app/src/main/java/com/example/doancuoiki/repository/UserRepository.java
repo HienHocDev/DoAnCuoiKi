@@ -216,4 +216,17 @@ public class UserRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
+    public void updatePhoneAndAddress(String uid, String phone, String address, SimpleCallback callback) {
+        Map<String, Object> data = new HashMap<>();
+        data.put("phone", phone);
+        data.put("address", address);
+
+        db.collection(COLLECTION_USERS)
+                .document(uid)
+                .set(data, SetOptions.merge())
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onError);
+    }
 }
+
+

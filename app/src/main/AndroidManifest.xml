@@ -25,6 +25,8 @@
         <activity android:name=".TasksActivity" />
         <activity android:name=".ProjectsActivity" />
         <activity android:name=".HomeActivity" />
+        <activity android:name=".ProfileDetailActivity" android:exported="false" />
+        <activity android:name=".ChangePasswordActivity" android:exported="false" />
         <activity
             android:name=".LoginActivity"
             android:windowSoftInputMode="adjustResize" />
