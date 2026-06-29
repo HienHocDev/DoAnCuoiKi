@@ -21,13 +21,19 @@
         <EditText
             android:id="@+id/edtProjectName"
             style="@style/FormInput"
-            android:hint="Tên dự án" />
+            android:hint="Tên dự án"
+            android:inputType="textCapSentences" />
 
         <EditText
             android:id="@+id/edtProjectDescription"
             style="@style/FormInput"
+            android:layout_height="96dp"
+            android:gravity="top|start"
             android:hint="Mô tả"
-            android:minLines="3" />
+            android:inputType="textCapSentences|textMultiLine"
+            android:minLines="3"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp" />
 
         <EditText
             android:id="@+id/edtStartDate"

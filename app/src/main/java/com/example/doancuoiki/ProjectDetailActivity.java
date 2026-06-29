@@ -38,6 +38,7 @@ public class ProjectDetailActivity extends Activity {
     private LinearLayout memberList;
     private LinearLayout taskList;
     private LinearLayout ownerActions;
+    private View reportButton;
     private View deleteButton;
 
     private String projectId;
@@ -58,9 +59,8 @@ public class ProjectDetailActivity extends Activity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnAddMember).setOnClickListener(v -> showAddMemberDialog());
         findViewById(R.id.btnAddProjectTask).setOnClickListener(v -> openAddTask());
+        reportButton.setOnClickListener(v -> openAddTask());
         deleteButton.setOnClickListener(v -> confirmDeleteProject());
-        findViewById(R.id.btnOpenReport).setOnClickListener(v ->
-                NavigationUtils.open(this, ReportActivity.class));
 
         loadProject();
     }
@@ -84,6 +84,7 @@ public class ProjectDetailActivity extends Activity {
         memberList = findViewById(R.id.projectMemberList);
         taskList = findViewById(R.id.projectTaskList);
         ownerActions = findViewById(R.id.ownerActions);
+        reportButton = findViewById(R.id.btnOpenReport);
         deleteButton = findViewById(R.id.btnDeleteProject);
     }
 
@@ -118,10 +119,11 @@ public class ProjectDetailActivity extends Activity {
 
         boolean isOwner = isCurrentUserOwner();
         ownerActions.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+        reportButton.setVisibility(isOwner ? View.VISIBLE : View.GONE);
         deleteButton.setVisibility(isOwner ? View.VISIBLE : View.GONE);
         ownerNoticeText.setText(isOwner
-                ? "Bạn là chủ dự án và có quyền thêm thành viên, giao công việc."
-                : "Bạn là thành viên dự án. Bạn chỉ có thể cập nhật trạng thái việc được giao.");
+                ? "Bạn là chủ dự án. Bạn có thể thêm thành viên và giao công việc cho nhóm."
+                : "Bạn là thành viên dự án. Bạn chỉ có thể xem và cập nhật trạng thái việc được giao.");
     }
 
     private void loadMembers() {
@@ -146,22 +148,18 @@ public class ProjectDetailActivity extends Activity {
         displayedMembers.clear();
         displayedMembers.addAll(users);
         memberList.removeAllViews();
-        if (users.isEmpty()) {
-            memberList.addView(ViewFactory.notificationCard(
-                    this, "Chưa tải được thành viên", "Danh sách thành viên đang trống.", ""));
-            return;
-        }
 
+        List<String> names = new ArrayList<>();
         for (User user : users) {
-            String role = user.getId().equals(currentProject.getOwnerId())
-                    ? "Chủ dự án" : "Thành viên";
-            memberList.addView(ViewFactory.notificationCard(
-                    this,
-                    valueOrDefault(user.getName(), valueOrDefault(user.getEmail(), "Thành viên")),
-                    valueOrDefault(user.getEmail(), user.getId()),
-                    role
-            ));
+            names.add(valueOrDefault(user.getName(), valueOrDefault(user.getEmail(), "Thành viên")));
         }
+        memberList.addView(ViewFactory.avatarStack(this, names), new LinearLayout.LayoutParams(0, -1, 1));
+
+        TextView label = new TextView(this);
+        label.setText(users.size() + " thành viên");
+        label.setTextColor(Color.rgb(125, 132, 150));
+        label.setTextSize(13);
+        memberList.addView(label, new LinearLayout.LayoutParams(-2, -2));
     }
 
     private void showAddMemberDialog() {
@@ -253,34 +251,36 @@ public class ProjectDetailActivity extends Activity {
         taskRepository.getTasksByProject(currentProject.getId(), new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
-                renderTasks(visibleTasksForCurrentUser(tasks));
+                renderTasks(visibleTasksForCurrentUser(tasks), tasks);
                 updateProjectProgressIfNeeded(tasks);
             }
 
             @Override
             public void onError(Exception exception) {
-                renderTasks(Collections.emptyList());
+                renderTasks(Collections.emptyList(), Collections.emptyList());
             }
         });
     }
 
-    private void renderTasks(List<Task> tasks) {
+    private void renderTasks(List<Task> visibleTasks, List<Task> allProjectTasks) {
         taskList.removeAllViews();
-        int total = tasks.size();
-        int done = countDone(tasks);
+        int total = allProjectTasks.size();
+        int done = countDone(allProjectTasks);
         int progress = percent(done, total);
 
         totalTaskText.setText(total + "\nTổng công việc");
         doneTaskText.setText(done + "\nHoàn thành");
         progressText.setText(progress + "%\nTiến độ");
 
-        if (tasks.isEmpty()) {
-            taskList.addView(ViewFactory.notificationCard(
-                    this, "Chưa có công việc", "Chủ dự án chưa giao công việc nào.", ""));
+        if (visibleTasks.isEmpty()) {
+            String message = isCurrentUserOwner()
+                    ? "Dự án chưa có công việc. Hãy thêm công việc đầu tiên cho nhóm."
+                    : "Bạn chưa có công việc được giao trong dự án này.";
+            taskList.addView(ViewFactory.notificationCard(this, "Chưa có công việc", message, ""));
             return;
         }
 
-        for (Task task : tasks) {
+        for (Task task : visibleTasks) {
             View card = ViewFactory.taskCard(
                     this,
                     task.getTitle(),
@@ -363,8 +363,7 @@ public class ProjectDetailActivity extends Activity {
     }
 
     private boolean isCurrentUserOwner() {
-        return currentProject != null
-                && currentUserId.equals(currentProject.getOwnerId());
+        return currentProject != null && currentUserId.equals(currentProject.getOwnerId());
     }
 
     private int countDone(List<Task> tasks) {
@@ -411,8 +410,9 @@ public class ProjectDetailActivity extends Activity {
         descriptionText.setText("Dự án không tồn tại hoặc đã bị xóa.");
         dateText.setText("Từ -- đến --");
         ownerActions.setVisibility(View.GONE);
+        reportButton.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
         renderMembers(Collections.emptyList());
-        renderTasks(Collections.emptyList());
+        renderTasks(Collections.emptyList(), Collections.emptyList());
     }
 }

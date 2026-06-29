@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.example.doancuoiki.model.Project;
 import com.example.doancuoiki.repository.ProjectRepository;
 import com.example.doancuoiki.utils.DateUtils;
+import com.example.doancuoiki.utils.VietnameseInputUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -42,6 +43,9 @@ public class AddProjectActivity extends Activity {
         endDateInput = findViewById(R.id.edtEndDate);
         createStateText = findViewById(R.id.txtCreateState);
         createButton = findViewById(R.id.btnCreateProject);
+
+        VietnameseInputUtils.setupSingleLine(nameInput);
+        VietnameseInputUtils.setupMultiLine(descriptionInput);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         createButton.setOnClickListener(v -> validateAndCreateProject());

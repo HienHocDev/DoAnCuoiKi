@@ -14,8 +14,7 @@
 
             <TextView
                 style="@style/ScreenTitle"
-                android:text="Dự án"
-                />
+                android:text="Dự án" />
 
             <TextView
                 style="@style/ScreenSubtitle"
@@ -24,8 +23,31 @@
             <EditText
                 android:id="@+id/edtSearchProject"
                 style="@style/SearchInput"
-                android:hint="Tìm kiếm dự án..."
-                />
+                android:hint="Tìm kiếm dự án..." />
+
+            <LinearLayout
+                android:id="@+id/projectFilterTabs"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tabAllProjects"
+                    style="@style/TaskTab"
+                    android:text="Tất cả" />
+
+                <TextView
+                    android:id="@+id/tabOwnedProjects"
+                    style="@style/TaskTab"
+                    android:text="Tôi quản lý" />
+
+                <TextView
+                    android:id="@+id/tabDoneProjects"
+                    style="@style/TaskTab"
+                    android:text="Đã hoàn thành" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/txtProjectState"
@@ -45,8 +67,7 @@
             <Button
                 android:id="@+id/btnOpenAddProject"
                 style="@style/PrimaryButton"
-                android:text="+  Thêm dự án"
-                />
+                android:text="+  Thêm dự án" />
         </LinearLayout>
     </ScrollView>
 

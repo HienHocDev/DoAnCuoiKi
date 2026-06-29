@@ -25,6 +25,35 @@
                 style="@style/SearchInput"
                 android:hint="Tìm kiếm công việc..." />
 
+            <LinearLayout
+                android:id="@+id/taskFilterTabs"
+                android:layout_width="match_parent"
+                android:layout_height="42dp"
+                android:layout_marginTop="12dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/tabAllTasks"
+                    style="@style/TaskTab"
+                    android:text="Tất cả" />
+
+                <TextView
+                    android:id="@+id/tabTodoTasks"
+                    style="@style/TaskTab"
+                    android:text="Chưa làm" />
+
+                <TextView
+                    android:id="@+id/tabDoingTasks"
+                    style="@style/TaskTab"
+                    android:text="Đang làm" />
+
+                <TextView
+                    android:id="@+id/tabDoneTasks"
+                    style="@style/TaskTab"
+                    android:text="Đã xong" />
+            </LinearLayout>
+
             <TextView
                 android:id="@+id/txtTaskState"
                 android:layout_width="match_parent"
