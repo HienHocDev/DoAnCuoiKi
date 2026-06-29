@@ -97,4 +97,34 @@ public class ProjectRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onError);
     }
+
+    public interface ActivityListCallback {
+        void onSuccess(List<com.example.doancuoiki.model.ActivityLog> logs);
+        void onError(Exception exception);
+    }
+
+    public void getRecentActivities(String userId, ActivityListCallback callback) {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("activities")
+                .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING) // Sắp xếp mới nhất lên đầu
+                .limit(5) // Lấy tối đa 5 hoạt động gần nhất
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<com.example.doancuoiki.model.ActivityLog> list = new ArrayList<>();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        com.example.doancuoiki.model.ActivityLog log = doc.toObject(com.example.doancuoiki.model.ActivityLog.class);
+                        if (log != null) {
+                            list.add(log);
+                        }
+                    }
+                    callback.onSuccess(list);
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
+    public void addActivityLog(com.example.doancuoiki.model.ActivityLog log, com.google.android.gms.tasks.OnSuccessListener<com.google.firebase.firestore.DocumentReference> listener) {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("activities")
+                .add(log);
+    }
 }

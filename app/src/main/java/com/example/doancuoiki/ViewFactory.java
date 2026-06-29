@@ -37,7 +37,12 @@ public final class ViewFactory {
         LinearLayout textColumn = new LinearLayout(context);
         textColumn.setOrientation(LinearLayout.VERTICAL);
         textColumn.addView(text(context, name, 16, true, Color.rgb(34, 38, 50)));
-        textColumn.addView(text(context, subtitle, 12, false, Color.rgb(125, 132, 150)));
+
+        View subtitleView = text(context, subtitle, 12, false, Color.rgb(125, 132, 150));
+        LinearLayout.LayoutParams subtitleParams = new LinearLayout.LayoutParams(-1, -2);
+        subtitleParams.topMargin = dp(context, 6);
+        textColumn.addView(subtitleView, subtitleParams);
+
         header.addView(textColumn, new LinearLayout.LayoutParams(0, -2, 1));
 
         TextView percent = text(context, progress + "%", 14, true, Color.rgb(34, 197, 94));
@@ -49,6 +54,13 @@ public final class ViewFactory {
         ProgressBar progressBar = new ProgressBar(context, null, android.R.attr.progressBarStyleHorizontal);
         progressBar.setMax(100);
         progressBar.setProgress(Math.max(0, Math.min(progress, 100)));
+
+        try {
+            progressBar.setProgressDrawable(context.getResources().getDrawable(R.drawable.custom_progress_bar, context.getTheme()));
+        } catch (Exception e) {
+            progressBar.setProgressDrawable(context.getResources().getDrawable(R.drawable.custom_progress_bar));
+        }
+
         card.addView(progressBar, topParams(-1, dp(context, 8), dp(context, 12)));
 
         return card;
