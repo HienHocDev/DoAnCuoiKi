@@ -3,6 +3,7 @@ package com.example.doancuoiki;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -20,14 +21,24 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TasksActivity extends Activity {
+    private static final String FILTER_ALL = "all";
+    private static final String FILTER_TODO = "todo";
+    private static final String FILTER_DOING = "doing";
+    private static final String FILTER_DONE = "done";
+
     private final TaskRepository taskRepository = new TaskRepository();
     private final List<Task> allTasks = new ArrayList<>();
 
     private LinearLayout taskList;
     private TextView taskState;
     private EditText searchInput;
+    private TextView tabAll;
+    private TextView tabTodo;
+    private TextView tabDoing;
+    private TextView tabDone;
     private String currentKeyword = "";
     private String currentUserId = "";
+    private String currentFilter = FILTER_ALL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,12 +46,35 @@ public class TasksActivity extends Activity {
         setContentView(R.layout.activity_tasks);
         NavigationUtils.setupBottomNav(this, NavigationUtils.TASKS);
 
-        taskList = findViewById(R.id.taskList);
-        taskState = findViewById(R.id.txtTaskState);
-        searchInput = findViewById(R.id.edtSearchTask);
+        bindViews();
+        setupActions();
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = user == null ? "" : user.getUid();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadTasks();
+    }
+
+    private void bindViews() {
+        taskList = findViewById(R.id.taskList);
+        taskState = findViewById(R.id.txtTaskState);
+        searchInput = findViewById(R.id.edtSearchTask);
+        tabAll = findViewById(R.id.tabAllTasks);
+        tabTodo = findViewById(R.id.tabTodoTasks);
+        tabDoing = findViewById(R.id.tabDoingTasks);
+        tabDone = findViewById(R.id.tabDoneTasks);
+    }
+
+    private void setupActions() {
+        tabAll.setOnClickListener(v -> setFilter(FILTER_ALL));
+        tabTodo.setOnClickListener(v -> setFilter(FILTER_TODO));
+        tabDoing.setOnClickListener(v -> setFilter(FILTER_DOING));
+        tabDone.setOnClickListener(v -> setFilter(FILTER_DONE));
+        updateTabs();
 
         searchInput.addTextChangedListener(new TextWatcher() {
             @Override
@@ -59,10 +93,22 @@ public class TasksActivity extends Activity {
         });
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        loadTasks();
+    private void setFilter(String filter) {
+        currentFilter = filter;
+        updateTabs();
+        renderTasks();
+    }
+
+    private void updateTabs() {
+        styleTab(tabAll, FILTER_ALL.equals(currentFilter));
+        styleTab(tabTodo, FILTER_TODO.equals(currentFilter));
+        styleTab(tabDoing, FILTER_DOING.equals(currentFilter));
+        styleTab(tabDone, FILTER_DONE.equals(currentFilter));
+    }
+
+    private void styleTab(TextView tab, boolean selected) {
+        tab.setTextColor(selected ? Color.rgb(34, 197, 94) : Color.rgb(125, 132, 150));
+        tab.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
     }
 
     private void loadTasks() {
@@ -92,15 +138,13 @@ public class TasksActivity extends Activity {
         taskList.removeAllViews();
         List<Task> filteredTasks = new ArrayList<>();
         for (Task task : allTasks) {
-            if (matchesKeyword(task)) {
+            if (matchesKeyword(task) && matchesFilter(task)) {
                 filteredTasks.add(task);
             }
         }
 
         if (filteredTasks.isEmpty()) {
-            taskState.setText(currentKeyword.isEmpty()
-                    ? "Bạn chưa được giao công việc nào."
-                    : "Không có công việc phù hợp.");
+            taskState.setText(emptyText());
             return;
         }
 
@@ -120,6 +164,22 @@ public class TasksActivity extends Activity {
         }
     }
 
+    private String emptyText() {
+        if (!currentKeyword.isEmpty()) {
+            return "Không có công việc phù hợp.";
+        }
+        if (FILTER_TODO.equals(currentFilter)) {
+            return "Không có công việc chưa làm.";
+        }
+        if (FILTER_DOING.equals(currentFilter)) {
+            return "Không có công việc đang làm.";
+        }
+        if (FILTER_DONE.equals(currentFilter)) {
+            return "Không có công việc đã xong.";
+        }
+        return "Bạn chưa được giao công việc nào.";
+    }
+
     private boolean matchesKeyword(Task task) {
         if (currentKeyword.isEmpty()) {
             return true;
@@ -127,6 +187,19 @@ public class TasksActivity extends Activity {
         return contains(task.getTitle())
                 || contains(task.getProjectName())
                 || contains(task.getStatus());
+    }
+
+    private boolean matchesFilter(Task task) {
+        if (FILTER_TODO.equals(currentFilter)) {
+            return Task.STATUS_NOT_STARTED.equals(task.getStatus());
+        }
+        if (FILTER_DOING.equals(currentFilter)) {
+            return Task.STATUS_IN_PROGRESS.equals(task.getStatus());
+        }
+        if (FILTER_DONE.equals(currentFilter)) {
+            return Task.STATUS_DONE.equals(task.getStatus());
+        }
+        return true;
     }
 
     private boolean contains(String value) {

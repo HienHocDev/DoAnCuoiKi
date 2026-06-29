@@ -15,6 +15,7 @@ import com.example.doancuoiki.repository.ProjectRepository;
 import com.example.doancuoiki.repository.TaskRepository;
 import com.example.doancuoiki.repository.UserRepository;
 import com.example.doancuoiki.utils.DateUtils;
+import com.example.doancuoiki.utils.VietnameseInputUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -76,6 +77,9 @@ public class AddTaskActivity extends Activity {
         projectSpinner = findViewById(R.id.spinnerProject);
         assigneeSpinner = findViewById(R.id.spinnerAssignee);
         prioritySpinner = findViewById(R.id.spinnerPriority);
+
+        VietnameseInputUtils.setupSingleLine(titleInput);
+        VietnameseInputUtils.setupMultiLine(descriptionInput);
     }
 
     private void setupActions() {

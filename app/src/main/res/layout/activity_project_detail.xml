@@ -33,15 +33,23 @@
             android:textColor="#7D8496"
             android:textSize="13sp" />
 
+        <LinearLayout
+            android:id="@+id/projectMemberList"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="12dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal" />
+
         <TextView
             android:id="@+id/txtOwnerNotice"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="10dp"
             android:background="@drawable/bg_soft_primary"
-            android:padding="12dp"
+            android:padding="10dp"
             android:textColor="#15803D"
-            android:textSize="13sp" />
+            android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -67,13 +75,7 @@
 
         <TextView
             style="@style/SectionTitle"
-            android:text="Thành viên dự án" />
-
-        <LinearLayout
-            android:id="@+id/projectMemberList"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
+            android:text="Danh sách công việc" />
 
         <LinearLayout
             android:id="@+id/ownerActions"
@@ -101,10 +103,6 @@
                 android:text="+ Công việc" />
         </LinearLayout>
 
-        <TextView
-            style="@style/SectionTitle"
-            android:text="Danh sách công việc" />
-
         <LinearLayout
             android:id="@+id/projectTaskList"
             android:layout_width="match_parent"
@@ -114,7 +112,7 @@
         <Button
             android:id="@+id/btnOpenReport"
             style="@style/PrimaryButton"
-            android:text="Xem báo cáo tiến độ" />
+            android:text="+ Thêm công việc mới" />
 
         <Button
             android:id="@+id/btnDeleteProject"

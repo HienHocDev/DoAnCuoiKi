@@ -106,12 +106,7 @@ public class CalendarActivity extends Activity {
             @Override
             public void onSuccess(List<Task> tasks) {
                 allTasks.clear();
-                if (tasks.isEmpty()) {
-                    calendarState.setText("Chưa có công việc nào trên lịch.");
-                } else {
-                    allTasks.addAll(tasks);
-                    calendarState.setText(summaryText(tasks));
-                }
+                allTasks.addAll(tasks);
                 renderCalendarDays();
                 renderTasksForSelectedDate();
             }
@@ -135,7 +130,7 @@ public class CalendarActivity extends Activity {
             dayText.setGravity(Gravity.CENTER);
             dayText.setTextColor(Color.rgb(125, 132, 150));
             dayText.setTextSize(12);
-            weekHeaderGrid.addView(dayText, gridParams(1, 32));
+            weekHeaderGrid.addView(dayText, gridParams(32));
         }
     }
 
@@ -155,7 +150,7 @@ public class CalendarActivity extends Activity {
         Set<String> taskDates = dueDateSet();
         for (int i = 0; i < 42; i++) {
             Calendar cellDate = (Calendar) cursor.clone();
-            dayGrid.addView(dayCell(cellDate, taskDates.contains(dateKey(cellDate))), gridParams(1, 42));
+            dayGrid.addView(dayCell(cellDate, taskDates.contains(dateKey(cellDate))), gridParams(45));
             cursor.add(Calendar.DAY_OF_MONTH, 1);
         }
     }
@@ -164,17 +159,10 @@ public class CalendarActivity extends Activity {
         LinearLayout cell = new LinearLayout(this);
         cell.setOrientation(LinearLayout.VERTICAL);
         cell.setGravity(Gravity.CENTER);
-        cell.setPadding(0, dp(2), 0, dp(2));
+        cell.setPadding(0, dp(2), 0, dp(4));
 
         boolean isCurrentMonth = cellDate.get(Calendar.MONTH) == visibleMonth.get(Calendar.MONTH);
-        boolean isSelected = DateUtils.isSameDate(
-                DateUtils.fromCalendarDate(
-                        cellDate.get(Calendar.YEAR),
-                        cellDate.get(Calendar.MONTH),
-                        cellDate.get(Calendar.DAY_OF_MONTH)
-                ),
-                selectedDate
-        );
+        boolean isSelected = DateUtils.isSameDate(dateKey(cellDate), selectedDate);
         boolean isToday = isSameCalendarDate(cellDate, Calendar.getInstance());
 
         TextView dayNumber = new TextView(this);
@@ -189,22 +177,18 @@ public class CalendarActivity extends Activity {
             dayNumber.setBackgroundResource(R.drawable.bg_calendar_today);
             dayNumber.setTextColor(Color.rgb(34, 197, 94));
         }
-        cell.addView(dayNumber, new LinearLayout.LayoutParams(dp(32), dp(32)));
+        cell.addView(dayNumber, new LinearLayout.LayoutParams(dp(30), dp(30)));
 
         View dot = new View(this);
-        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(6), dp(6));
-        dotParams.topMargin = dp(2);
-        if (hasTask) {
+        LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(5), dp(5));
+        dotParams.topMargin = dp(4);
+        if (hasTask && isCurrentMonth) {
             dot.setBackgroundResource(R.drawable.bg_calendar_dot);
         }
         cell.addView(dot, dotParams);
 
         cell.setOnClickListener(v -> {
-            selectedDate = DateUtils.fromCalendarDate(
-                    cellDate.get(Calendar.YEAR),
-                    cellDate.get(Calendar.MONTH),
-                    cellDate.get(Calendar.DAY_OF_MONTH)
-            );
+            selectedDate = dateKey(cellDate);
             if (cellDate.get(Calendar.MONTH) != visibleMonth.get(Calendar.MONTH)
                     || cellDate.get(Calendar.YEAR) != visibleMonth.get(Calendar.YEAR)) {
                 visibleMonth.set(Calendar.YEAR, cellDate.get(Calendar.YEAR));
@@ -268,7 +252,8 @@ public class CalendarActivity extends Activity {
             View card = ViewFactory.taskCard(
                     this,
                     task.getTitle(),
-                    valueOrDefault(task.getProjectName(), "Chưa chọn dự án") + " - Hạn: " + valueOrDefault(task.getDueDate(), "--"),
+                    valueOrDefault(task.getProjectName(), "Chưa chọn dự án")
+                            + " - Hạn: " + valueOrDefault(task.getDueDate(), "--"),
                     task.getStatus(),
                     badgeBackground(task.getStatus()),
                     badgeColor(task.getStatus())
@@ -276,19 +261,6 @@ public class CalendarActivity extends Activity {
             card.setOnClickListener(v -> openTaskDetail(task));
             taskList.addView(card);
         }
-    }
-
-    private String summaryText(List<Task> tasks) {
-        int dueSoon = 0;
-        int done = 0;
-        for (Task task : tasks) {
-            if (Task.STATUS_DONE.equals(task.getStatus())) {
-                done++;
-            } else if (DateUtils.isDueSoon(task.getDueDate(), 3)) {
-                dueSoon++;
-            }
-        }
-        return "Có " + tasks.size() + " công việc, " + done + " đã hoàn thành, " + dueSoon + " sắp đến hạn.";
     }
 
     private void openTaskDetail(Task task) {
@@ -324,17 +296,17 @@ public class CalendarActivity extends Activity {
         return Color.rgb(34, 197, 94);
     }
 
-    private GridLayout.LayoutParams gridParams(int rowSpan, int heightDp) {
+    private GridLayout.LayoutParams gridParams(int heightDp) {
         GridLayout.LayoutParams params = new GridLayout.LayoutParams();
         params.width = 0;
         params.height = dp(heightDp);
         params.columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
-        params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, rowSpan);
+        params.rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f);
+        params.setGravity(Gravity.FILL);
         return params;
     }
 
     private int dp(int value) {
         return Math.round(value * getResources().getDisplayMetrics().density);
     }
-
 }

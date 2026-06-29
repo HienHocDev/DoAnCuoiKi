@@ -12,8 +12,7 @@
 
         <TextView
             style="@style/ScreenTitle"
-            android:text="Thêm công việc"
-            />
+            android:text="Thêm công việc" />
 
         <TextView
             style="@style/ScreenSubtitle"
@@ -22,17 +21,23 @@
         <EditText
             android:id="@+id/edtTaskTitle"
             style="@style/FormInput"
-            android:hint="Tên công việc" />
+            android:hint="Tên công việc"
+            android:inputType="textCapSentences" />
 
         <EditText
             android:id="@+id/edtTaskDescription"
             style="@style/FormInput"
-            android:hint="Mô tả công việc" />
+            android:layout_height="88dp"
+            android:gravity="top|start"
+            android:hint="Mô tả công việc"
+            android:inputType="textCapSentences|textMultiLine"
+            android:minLines="2"
+            android:paddingTop="14dp"
+            android:paddingBottom="14dp" />
 
         <TextView
             style="@style/FieldLabel"
-            android:text="Dự án"
-            />
+            android:text="Dự án" />
 
         <Spinner
             android:id="@+id/spinnerProject"
@@ -40,8 +45,7 @@
 
         <TextView
             style="@style/FieldLabel"
-            android:text="Người thực hiện"
-            />
+            android:text="Người thực hiện" />
 
         <Spinner
             android:id="@+id/spinnerAssignee"
@@ -49,8 +53,7 @@
 
         <TextView
             style="@style/FieldLabel"
-            android:text="Độ ưu tiên"
-            />
+            android:text="Độ ưu tiên" />
 
         <Spinner
             android:id="@+id/spinnerPriority"
@@ -67,7 +70,6 @@
             android:id="@+id/btnSaveTask"
             style="@style/PrimaryButton"
             android:layout_marginTop="28dp"
-            android:text="Lưu công việc"
-            />
+            android:text="Lưu công việc" />
     </LinearLayout>
 </ScrollView>
