@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="80dp"
+    android:height="80dp"
+    android:viewportWidth="80"
+    android:viewportHeight="80">
+    <!-- Circle background -->
+    <path
+        android:fillColor="#F0FDF4"
+        android:pathData="M40,40m-40,0a40,40 0,1,1 80,0a40,40 0,1,1 -80,0" />
+    <!-- Folder icon -->
+    <path
+        android:fillColor="#BBF7D0"
+        android:pathData="M20,30 l0,25 a5,5 0,0,0 5,5 l30,0 a5,5 0,0,0 5,-5 l0,-18 a5,5 0,0,0 -5,-5 l-12,0 l-5,-5 l-13,0 a5,5 0,0,0 -5,5 z" />
+    <!-- Paper -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M30,22 h20 v20 h-20 z" />
+    <!-- Lines on paper -->
+    <path android:fillColor="#86EFAC" android:pathData="M35,28 h10 v2 h-10 z" />
+    <path android:fillColor="#86EFAC" android:pathData="M35,32 h10 v2 h-10 z" />
+    <!-- Plus button -->
+    <path
+        android:fillColor="#15B759"
+        android:pathData="M55,55m-12,0a12,12 0,1,1 24,0a12,12 0,1,1 -24,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M54,48 h2 v14 h-2 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M48,54 h14 v2 h-14 z" />
+</vector>

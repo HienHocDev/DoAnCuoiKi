@@ -62,7 +62,7 @@ public class HomeActivity extends Activity {
         setContentView(R.layout.activity_home);
         NavigationUtils.setupBottomNav(this, NavigationUtils.HOME);
 
-        RelativeLayout mainLayout = findViewById(R.id.main_home_layout);
+        android.view.View mainLayout = findViewById(android.R.id.content);
         if (mainLayout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
                 Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());

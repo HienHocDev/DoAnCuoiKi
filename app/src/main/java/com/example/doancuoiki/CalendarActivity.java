@@ -30,6 +30,7 @@ public class CalendarActivity extends Activity {
     private final List<Task> allTasks = new ArrayList<>();
 
     private LinearLayout taskList;
+    private View emptyStateContainer;
     private TextView selectedDateText;
     private TextView calendarState;
     private TextView monthText;
@@ -43,6 +44,15 @@ public class CalendarActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_calendar);
+
+        android.view.View mainLayout = findViewById(R.id.main_layout);
+        if (mainLayout != null) {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                androidx.core.graphics.Insets insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), 0);
+                return windowInsets;
+            });
+        }
         NavigationUtils.setupBottomNav(this, NavigationUtils.CALENDAR);
 
         bindViews();
@@ -60,6 +70,7 @@ public class CalendarActivity extends Activity {
 
     private void bindViews() {
         taskList = findViewById(R.id.calendarTaskList);
+        emptyStateContainer = findViewById(R.id.emptyStateContainer);
         selectedDateText = findViewById(R.id.txtSelectedDate);
         calendarState = findViewById(R.id.txtCalendarState);
         monthText = findViewById(R.id.txtCalendarMonth);
@@ -169,10 +180,14 @@ public class CalendarActivity extends Activity {
         dayNumber.setText(String.valueOf(cellDate.get(Calendar.DAY_OF_MONTH)));
         dayNumber.setGravity(Gravity.CENTER);
         dayNumber.setTextSize(13);
-        dayNumber.setTextColor(isCurrentMonth ? Color.rgb(34, 38, 50) : Color.rgb(190, 195, 205));
+        dayNumber.setTextColor(isCurrentMonth ? Color.parseColor("#222632") : Color.parseColor("#CBD5E1"));
+        if (!isCurrentMonth) dayNumber.setAlpha(0.5f);
         if (isSelected) {
             dayNumber.setTextColor(Color.WHITE);
-            dayNumber.setBackgroundResource(R.drawable.bg_calendar_selected_day);
+            android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+            gd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            gd.setColor(Color.parseColor("#15B759"));
+            dayNumber.setBackground(gd);
         } else if (isToday) {
             dayNumber.setBackgroundResource(R.drawable.bg_calendar_today);
             dayNumber.setTextColor(Color.rgb(34, 197, 94));
@@ -183,7 +198,10 @@ public class CalendarActivity extends Activity {
         LinearLayout.LayoutParams dotParams = new LinearLayout.LayoutParams(dp(5), dp(5));
         dotParams.topMargin = dp(4);
         if (hasTask && isCurrentMonth) {
-            dot.setBackgroundResource(R.drawable.bg_calendar_dot);
+            android.graphics.drawable.GradientDrawable dotGd = new android.graphics.drawable.GradientDrawable();
+            dotGd.setShape(android.graphics.drawable.GradientDrawable.OVAL);
+            dotGd.setColor(Color.parseColor("#F59E0B"));
+            dot.setBackground(dotGd);
         }
         cell.addView(dot, dotParams);
 
@@ -234,6 +252,7 @@ public class CalendarActivity extends Activity {
 
     private void renderTasksForSelectedDate() {
         taskList.removeAllViews();
+        calendarState.setVisibility(View.GONE);
 
         List<Task> tasksInDay = new ArrayList<>();
         for (Task task : allTasks) {
@@ -243,11 +262,14 @@ public class CalendarActivity extends Activity {
         }
 
         if (tasksInDay.isEmpty()) {
-            calendarState.setText("Không có công việc đến hạn trong ngày này.");
+            taskList.setVisibility(View.GONE);
+            if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.VISIBLE);
             return;
         }
 
-        calendarState.setText("Có " + tasksInDay.size() + " công việc đến hạn.");
+        if (emptyStateContainer != null) emptyStateContainer.setVisibility(View.GONE);
+        taskList.setVisibility(View.VISIBLE);
+        
         for (Task task : tasksInDay) {
             View card = ViewFactory.taskCard(
                     this,

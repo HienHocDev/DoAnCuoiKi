@@ -5,6 +5,9 @@ import android.app.AlertDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -37,9 +40,11 @@ public class ProjectDetailActivity extends Activity {
     private TextView progressText;
     private LinearLayout memberList;
     private LinearLayout taskList;
-    private LinearLayout ownerActions;
+    
     private View reportButton;
     private View deleteButton;
+    private View addMemberButton;
+    private View addTaskButton;
 
     private String projectId;
     private String currentUserId = "";
@@ -52,14 +57,26 @@ public class ProjectDetailActivity extends Activity {
         setContentView(R.layout.activity_project_detail);
 
         bindViews();
+
+        View mainLayout = findViewById(android.R.id.content);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
+                return windowInsets;
+            });
+        }
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         currentUserId = user == null ? "" : user.getUid();
         projectId = getIntent().getStringExtra(ProjectsActivity.EXTRA_PROJECT_ID);
 
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
-        findViewById(R.id.btnAddMember).setOnClickListener(v -> showAddMemberDialog());
-        findViewById(R.id.btnAddProjectTask).setOnClickListener(v -> openAddTask());
-        reportButton.setOnClickListener(v -> openAddTask());
+        if (addMemberButton != null) addMemberButton.setOnClickListener(v -> showAddMemberDialog());
+        if (addTaskButton != null) addTaskButton.setOnClickListener(v -> openAddTask());
+        reportButton.setOnClickListener(v -> {
+            Intent intent = new Intent(this, ReportActivity.class);
+            startActivity(intent);
+        });
         deleteButton.setOnClickListener(v -> confirmDeleteProject());
 
         loadProject();
@@ -83,9 +100,11 @@ public class ProjectDetailActivity extends Activity {
         progressText = findViewById(R.id.txtProjectProgress);
         memberList = findViewById(R.id.projectMemberList);
         taskList = findViewById(R.id.projectTaskList);
-        ownerActions = findViewById(R.id.ownerActions);
+        
         reportButton = findViewById(R.id.btnOpenReport);
         deleteButton = findViewById(R.id.btnDeleteProject);
+        addMemberButton = findViewById(R.id.btnAddMember);
+        addTaskButton = findViewById(R.id.btnAddProjectTask);
     }
 
     private void loadProject() {
@@ -118,12 +137,12 @@ public class ProjectDetailActivity extends Activity {
                 + " đến " + valueOrDefault(currentProject.getEndDate(), "--"));
 
         boolean isOwner = isCurrentUserOwner();
-        ownerActions.setVisibility(isOwner ? View.VISIBLE : View.GONE);
+        
         reportButton.setVisibility(isOwner ? View.VISIBLE : View.GONE);
         deleteButton.setVisibility(isOwner ? View.VISIBLE : View.GONE);
         ownerNoticeText.setText(isOwner
-                ? "Bạn là chủ dự án. Bạn có thể thêm thành viên và giao công việc cho nhóm."
-                : "Bạn là thành viên dự án. Bạn chỉ có thể xem và cập nhật trạng thái việc được giao.");
+                ? "Dự án tạo lịch và sự kiện nhóm, tích hợp nhắc nhở và đồng bộ thành viên.\nBạn là chủ dự án."
+                : "Dự án tạo lịch và sự kiện nhóm.\nBạn là thành viên dự án.");
     }
 
     private void loadMembers() {
@@ -153,7 +172,10 @@ public class ProjectDetailActivity extends Activity {
         for (User user : users) {
             names.add(valueOrDefault(user.getName(), valueOrDefault(user.getEmail(), "Thành viên")));
         }
-        memberList.addView(ViewFactory.avatarStack(this, names), new LinearLayout.LayoutParams(0, -1, 1));
+        
+        boolean isOwner = isCurrentUserOwner();
+        View stack = ViewFactory.avatarStack(this, names, isOwner, v -> showAddMemberDialog());
+        memberList.addView(stack, new LinearLayout.LayoutParams(0, -1, 1));
 
         TextView label = new TextView(this);
         label.setText(users.size() + " thành viên");
@@ -161,7 +183,6 @@ public class ProjectDetailActivity extends Activity {
         label.setTextSize(13);
         memberList.addView(label, new LinearLayout.LayoutParams(-2, -2));
     }
-
     private void showAddMemberDialog() {
         if (!isCurrentUserOwner()) {
             NavigationUtils.showMessage(this, "Chỉ chủ dự án được thêm thành viên");
@@ -409,7 +430,7 @@ public class ProjectDetailActivity extends Activity {
         titleText.setText("Không tìm thấy dự án");
         descriptionText.setText("Dự án không tồn tại hoặc đã bị xóa.");
         dateText.setText("Từ -- đến --");
-        ownerActions.setVisibility(View.GONE);
+
         reportButton.setVisibility(View.GONE);
         deleteButton.setVisibility(View.GONE);
         renderMembers(Collections.emptyList());
