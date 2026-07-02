@@ -30,12 +30,20 @@ public class AddProjectActivity extends Activity {
     private EditText startDateInput;
     private EditText endDateInput;
     private TextView createStateText;
-    private Button createButton;
+    private TextView createButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_project);
+        android.view.View mainLayout = findViewById(R.id.main_layout);
+        if (mainLayout != null) {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                androidx.core.graphics.Insets insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
+                return windowInsets;
+            });
+        }
 
         nameInput = findViewById(R.id.edtProjectName);
         descriptionInput = findViewById(R.id.edtProjectDescription);

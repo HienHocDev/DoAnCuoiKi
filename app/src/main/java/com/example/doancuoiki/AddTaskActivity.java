@@ -7,6 +7,7 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
 
 import com.example.doancuoiki.model.Project;
 import com.example.doancuoiki.model.Task;
@@ -43,6 +44,10 @@ public class AddTaskActivity extends Activity {
     private Spinner projectSpinner;
     private Spinner assigneeSpinner;
     private Spinner prioritySpinner;
+    private Spinner categorySpinner;
+    private Spinner reminderTypeSpinner;
+    private EditText edtReminderTime;
+    private TextView txtCharCount;
     private String currentUserId = "";
     private String requestedProjectId;
 
@@ -77,6 +82,10 @@ public class AddTaskActivity extends Activity {
         projectSpinner = findViewById(R.id.spinnerProject);
         assigneeSpinner = findViewById(R.id.spinnerAssignee);
         prioritySpinner = findViewById(R.id.spinnerPriority);
+        categorySpinner = findViewById(R.id.spinnerCategory);
+        reminderTypeSpinner = findViewById(R.id.spinnerReminderType);
+        edtReminderTime = findViewById(R.id.edtReminderTime);
+        txtCharCount = findViewById(R.id.txtCharCount);
 
         VietnameseInputUtils.setupSingleLine(titleInput);
         VietnameseInputUtils.setupMultiLine(descriptionInput);
@@ -86,6 +95,13 @@ public class AddTaskActivity extends Activity {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnSaveTask).setOnClickListener(v -> saveTask());
         dueDateInput.setOnClickListener(v -> showDatePicker());
+        
+        edtReminderTime.setOnClickListener(v -> {
+            java.util.Calendar c = java.util.Calendar.getInstance();
+            new android.app.TimePickerDialog(this, (view, hourOfDay, minute) -> {
+                edtReminderTime.setText(String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+            }, c.get(java.util.Calendar.HOUR_OF_DAY), c.get(java.util.Calendar.MINUTE), true).show();
+        });
         projectSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View view,
@@ -101,6 +117,8 @@ public class AddTaskActivity extends Activity {
 
     private void setupSpinners() {
         setSpinnerItems(prioritySpinner, Arrays.asList("Thấp", "Trung bình", "Cao"));
+        setSpinnerItems(categorySpinner, Arrays.asList("Học tập", "Công việc", "Cá nhân"));
+        setSpinnerItems(reminderTypeSpinner, Arrays.asList("Không nhắc", "1 giờ", "1 ngày", "3 ngày"));
     }
 
     private void loadOwnedProjects() {

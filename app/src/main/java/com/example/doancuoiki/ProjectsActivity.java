@@ -5,11 +5,15 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.doancuoiki.model.Project;
@@ -53,6 +57,15 @@ public class ProjectsActivity extends Activity {
         setContentView(R.layout.activity_projects);
         NavigationUtils.setupBottomNav(this, NavigationUtils.PROJECTS);
 
+        View mainLayout = findViewById(android.R.id.content);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), 0);
+                return windowInsets;
+            });
+        }
+
         bindViews();
         setupActions();
         resolveCurrentUser();
@@ -67,6 +80,8 @@ public class ProjectsActivity extends Activity {
         }
     }
 
+    private View tabAllUnderline, tabOwnedUnderline, tabDoneUnderline;
+
     private void bindViews() {
         projectList = findViewById(R.id.projectList);
         projectState = findViewById(R.id.txtProjectState);
@@ -74,15 +89,34 @@ public class ProjectsActivity extends Activity {
         tabAll = findViewById(R.id.tabAllProjects);
         tabOwned = findViewById(R.id.tabOwnedProjects);
         tabDone = findViewById(R.id.tabDoneProjects);
+        
+        tabAllUnderline = findViewById(R.id.tabAllUnderline);
+        tabOwnedUnderline = findViewById(R.id.tabOwnedUnderline);
+        tabDoneUnderline = findViewById(R.id.tabDoneUnderline);
     }
 
     private void setupActions() {
         findViewById(R.id.btnOpenAddProject).setOnClickListener(v ->
                 NavigationUtils.open(this, AddProjectActivity.class));
+        
+        ImageView btnTopAdd = findViewById(R.id.btnTopAddProject);
+        if (btnTopAdd != null) {
+            btnTopAdd.setOnClickListener(v -> NavigationUtils.open(this, AddProjectActivity.class));
+        }
 
-        tabAll.setOnClickListener(v -> setFilter(FILTER_ALL));
-        tabOwned.setOnClickListener(v -> setFilter(FILTER_OWNED));
-        tabDone.setOnClickListener(v -> setFilter(FILTER_DONE));
+        View.OnClickListener allListener = v -> setFilter(FILTER_ALL);
+        View.OnClickListener ownedListener = v -> setFilter(FILTER_OWNED);
+        View.OnClickListener doneListener = v -> setFilter(FILTER_DONE);
+
+        tabAll.setOnClickListener(allListener);
+        tabOwned.setOnClickListener(ownedListener);
+        tabDone.setOnClickListener(doneListener);
+        
+        // Also make parent layouts clickable
+        ((View)tabAll.getParent()).setOnClickListener(allListener);
+        ((View)tabOwned.getParent()).setOnClickListener(ownedListener);
+        ((View)tabDone.getParent()).setOnClickListener(doneListener);
+
         updateTabs();
 
         searchInput.addTextChangedListener(new TextWatcher() {
@@ -109,14 +143,24 @@ public class ProjectsActivity extends Activity {
     }
 
     private void updateTabs() {
-        styleTab(tabAll, FILTER_ALL.equals(currentFilter));
-        styleTab(tabOwned, FILTER_OWNED.equals(currentFilter));
-        styleTab(tabDone, FILTER_DONE.equals(currentFilter));
+        styleTab(tabAll, FILTER_ALL.equals(currentFilter), tabAllUnderline);
+        styleTab(tabOwned, FILTER_OWNED.equals(currentFilter), tabOwnedUnderline);
+        styleTab(tabDone, FILTER_DONE.equals(currentFilter), tabDoneUnderline);
     }
 
-    private void styleTab(TextView tab, boolean selected) {
-        tab.setTextColor(selected ? Color.rgb(34, 197, 94) : Color.rgb(125, 132, 150));
-        tab.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+    private void styleTab(TextView tab, boolean selected, View underline) {
+        if (selected) {
+            tab.setTextColor(Color.parseColor("#15B759"));
+            tab.setTypeface(null, Typeface.BOLD);
+            tab.setBackgroundResource(R.drawable.bg_nav_active);
+            tab.setBackgroundTintList(android.content.res.ColorStateList.valueOf(Color.parseColor("#E6F9ED")));
+            if (underline != null) underline.setVisibility(View.VISIBLE);
+        } else {
+            tab.setTextColor(Color.parseColor("#7D8496"));
+            tab.setTypeface(null, Typeface.NORMAL);
+            tab.setBackgroundResource(0);
+            if (underline != null) underline.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void resolveCurrentUser() {

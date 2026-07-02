@@ -43,6 +43,15 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_account);
 
+        android.view.View mainLayout = findViewById(R.id.main_layout);
+        if (mainLayout != null) {
+            androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                androidx.core.graphics.Insets insets = windowInsets.getInsets(androidx.core.view.WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), 0);
+                return windowInsets;
+            });
+        }
+
         // Cấu hình thanh điều hướng Bottom Navigation
         NavigationUtils.setupBottomNav(this, NavigationUtils.ACCOUNT);
 
@@ -72,7 +81,6 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
      * Cấu hình tất cả các sự kiện click nút bấm trên màn hình
      */
     private void setupActions() {
-        // 1. Click vào Avatar -> Mở trực tiếp bộ sưu tập ảnh của thiết bị
         if (avatarImage != null) {
             avatarImage.setOnClickListener(v -> {
                 Intent intent = new Intent(Intent.ACTION_PICK);
@@ -81,72 +89,35 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
             });
         }
 
-        // 2. Click vào Thông tin cá nhân -> Chuyển sang Activity nhập liệu mới
         findViewById(R.id.btnProfileInfo).setOnClickListener(v -> {
             Intent intent = new Intent(AccountActivity.this, ProfileDetailActivity.class);
             startActivity(intent);
         });
 
-        // 3. Mở giao diện đổi mật khẩu trực tiếp
-        findViewById(R.id.btnChangePassword).setOnClickListener(v -> {
-            Intent intent = new Intent(AccountActivity.this, ChangePasswordActivity.class);
-            startActivity(intent);
-        });
+        findViewById(R.id.btnManageGroup).setOnClickListener(v -> 
+            Toast.makeText(AccountActivity.this, "Quản lý nhóm: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+        );
+
+        findViewById(R.id.btnMyProjects).setOnClickListener(v -> 
+            Toast.makeText(AccountActivity.this, "Dự án của tôi: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+        );
+
+        findViewById(R.id.btnSettings).setOnClickListener(v -> 
+            Toast.makeText(AccountActivity.this, "Cài đặt: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+        );
 
         findViewById(R.id.btnNotificationSetting).setOnClickListener(v ->
                 NavigationUtils.open(this, NotificationsActivity.class));
 
-        findViewById(R.id.btnLanguage).setOnClickListener(v ->
-                NavigationUtils.showMessage(this, "Ngôn ngữ hiện tại: Tiếng Việt"));
-
         findViewById(R.id.btnHelp).setOnClickListener(v ->
-                NavigationUtils.showMessage(this, "Liên hệ nhóm phát triển TaskFlow"));
+                NavigationUtils.showMessage(this, "Trung tâm trợ giúp: đang cập nhật..."));
 
-        findViewById(R.id.btnLogout).setOnClickListener(v -> logout());
+        findViewById(R.id.btnLogout).setOnClickListener(v -> {
+            authRepository.logout();
+            NavigationUtils.openAndFinish(this, LoginActivity.class);
+        });
     }
 
-    /**
-     * Nhận kết quả tấm ảnh trả về từ thư viện máy
-     */
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
-            android.net.Uri imageUri = data.getData();
-
-            // 1. Hiển thị tạm thời lên giao diện ngay lập tức
-            if (avatarImage != null) {
-                avatarImage.setImageURI(imageUri);
-            }
-
-            // 2. Chuyển đường dẫn Uri thành chuỗi String để lưu vào Database
-            String avatarUrlString = imageUri.toString();
-
-            // 3. Tiến hành gọi UserRepository để lưu vĩnh viễn lên Firebase
-            if (firebaseUser != null) {
-                String uid = firebaseUser.getUid();
-                NavigationUtils.showMessage(this, "Đang cập nhật ảnh đại diện...");
-
-                // ĐÃ SỬA: Thay UserCallback thành SimpleCallback khớp chính xác với UserRepository của bạn
-                userRepository.updateAvatar(uid, avatarUrlString, new UserRepository.SimpleCallback() {
-                    @Override
-                    public void onSuccess() {
-                        NavigationUtils.showMessage(AccountActivity.this, "Cập nhật Avatar vĩnh viễn thành công!");
-                    }
-
-                    @Override
-                    public void onError(Exception exception) {
-                        NavigationUtils.showMessage(AccountActivity.this, "Lỗi lưu Database: " + exception.getMessage());
-                    }
-                });
-            }
-        }
-    }
-
-    /**
-     * Lấy thông tin tài khoản đang đăng nhập từ Firebase
-     */
     private void loadProfile() {
         firebaseUser = authRepository.getCurrentUser();
         if (firebaseUser == null) {

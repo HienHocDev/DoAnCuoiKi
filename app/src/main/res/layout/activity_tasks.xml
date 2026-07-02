@@ -1,64 +1,224 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_app"
-    android:orientation="vertical">
+    android:background="#F8FAFC">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottom_container"
+        android:fillViewport="true">
 
-        <LinearLayout style="@style/ScreenContent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="20dp"
+            android:paddingTop="20dp"
+            android:paddingRight="20dp"
+            android:paddingBottom="20dp">
+
+            <!-- HEADER -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Công việc của tôi"
+                android:textColor="#222632"
+                android:textSize="28sp"
+                android:textStyle="bold" />
 
             <TextView
-                style="@style/ScreenTitle"
-                android:text="Công việc của tôi" />
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="Theo dõi các công việc tham gia và cập nhật trạng thái"
+                android:textColor="#7D8496"
+                android:textSize="14sp" />
 
-            <TextView
-                style="@style/ScreenSubtitle"
-                android:text="Theo dõi các công việc được giao và cập nhật trạng thái" />
-
-            <EditText
-                android:id="@+id/edtSearchTask"
-                style="@style/SearchInput"
-                android:hint="Tìm kiếm công việc..." />
-
+            <!-- SEARCH BAR + FILTER -->
             <LinearLayout
-                android:id="@+id/taskFilterTabs"
                 android:layout_width="match_parent"
-                android:layout_height="42dp"
-                android:layout_marginTop="12dp"
-                android:gravity="center_vertical"
+                android:layout_height="50dp"
+                android:layout_marginTop="24dp"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tabAllTasks"
-                    style="@style/TaskTab"
-                    android:text="Tất cả" />
+                <EditText
+                    android:id="@+id/edtSearchTask"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:background="@drawable/bg_stat_box"
+                    android:drawableStart="@android:drawable/ic_menu_search"
+                    android:drawablePadding="12dp"
+                    android:drawableTint="#A0A5B1"
+                    android:hint="Tìm kiếm công việc..."
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    android:textColor="#222632"
+                    android:textColorHint="#A0A5B1"
+                    android:textSize="15sp"
+                    android:elevation="1dp" />
 
-                <TextView
-                    android:id="@+id/tabTodoTasks"
-                    style="@style/TaskTab"
-                    android:text="Chưa làm" />
-
-                <TextView
-                    android:id="@+id/tabDoingTasks"
-                    style="@style/TaskTab"
-                    android:text="Đang làm" />
-
-                <TextView
-                    android:id="@+id/tabDoneTasks"
-                    style="@style/TaskTab"
-                    android:text="Đã xong" />
+                <ImageView
+                    android:layout_width="50dp"
+                    android:layout_height="50dp"
+                    android:layout_marginStart="12dp"
+                    android:background="@drawable/bg_stat_box"
+                    android:src="@android:drawable/ic_menu_sort_by_size"
+                    android:padding="12dp"
+                    app:tint="#7D8496"
+                    android:elevation="1dp" />
             </LinearLayout>
+
+            <!-- FILTER TABS (Horizontal Scroll) -->
+            <HorizontalScrollView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:scrollbars="none">
+
+                <LinearLayout
+                    android:id="@+id/taskFilterTabs"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <!-- Tab All -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="20dp">
+                        <TextView
+                            android:id="@+id/tabAll"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="4dp"
+                            android:text="Tất cả"
+                            android:textColor="#15B759"
+                            android:textStyle="bold"
+                            android:textSize="15sp" />
+                        <View
+                            android:id="@+id/tabAllUnderline"
+                            android:layout_width="20dp"
+                            android:layout_height="3dp"
+                            android:background="#15B759"
+                            android:visibility="visible" />
+                    </LinearLayout>
+
+                    <!-- Tab In Progress -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="20dp">
+                        <TextView
+                            android:id="@+id/tabInProgress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="4dp"
+                            android:text="Đang làm"
+                            android:textColor="#7D8496"
+                            android:textSize="15sp" />
+                        <View
+                            android:id="@+id/tabInProgressUnderline"
+                            android:layout_width="20dp"
+                            android:layout_height="3dp"
+                            android:background="#15B759"
+                            android:visibility="invisible" />
+                    </LinearLayout>
+
+                    <!-- Tab Pending -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="20dp">
+                        <TextView
+                            android:id="@+id/tabPending"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="4dp"
+                            android:text="Đang chờ"
+                            android:textColor="#7D8496"
+                            android:textSize="15sp" />
+                        <View
+                            android:id="@+id/tabPendingUnderline"
+                            android:layout_width="20dp"
+                            android:layout_height="3dp"
+                            android:background="#15B759"
+                            android:visibility="invisible" />
+                    </LinearLayout>
+
+                    <!-- Tab Done -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="20dp">
+                        <TextView
+                            android:id="@+id/tabDone"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="4dp"
+                            android:text="Đã xong"
+                            android:textColor="#7D8496"
+                            android:textSize="15sp" />
+                        <View
+                            android:id="@+id/tabDoneUnderline"
+                            android:layout_width="20dp"
+                            android:layout_height="3dp"
+                            android:background="#15B759"
+                            android:visibility="invisible" />
+                    </LinearLayout>
+
+                    <!-- Tab Cancelled -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:gravity="center"
+                        android:layout_marginEnd="20dp">
+                        <TextView
+                            android:id="@+id/tabCancelled"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:paddingBottom="4dp"
+                            android:text="Đã hủy"
+                            android:textColor="#7D8496"
+                            android:textSize="15sp" />
+                        <View
+                            android:id="@+id/tabCancelledUnderline"
+                            android:layout_width="20dp"
+                            android:layout_height="3dp"
+                            android:background="#15B759"
+                            android:visibility="invisible" />
+                    </LinearLayout>
+
+                </LinearLayout>
+            </HorizontalScrollView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="Việc tham gia của bạn"
+                android:textColor="#222632"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/txtTaskState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="16dp"
                 android:text="Đang tải công việc..."
                 android:textColor="#7D8496"
                 android:textSize="13sp" />
@@ -67,9 +227,20 @@
                 android:id="@+id/taskList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
                 android:orientation="vertical" />
+                
         </LinearLayout>
     </ScrollView>
 
-    <include layout="@layout/bottom_nav" />
-</LinearLayout>
+    <LinearLayout
+        android:id="@+id/bottom_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:orientation="vertical">
+
+        <include layout="@layout/bottom_nav" />
+    </LinearLayout>
+
+</RelativeLayout>

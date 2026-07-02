@@ -5,6 +5,9 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Bundle;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -59,21 +62,54 @@ public class TasksActivity extends Activity {
         loadTasks();
     }
 
+    private View tabAllUnderline, tabInProgressUnderline, tabPendingUnderline, tabDoneUnderline, tabCancelledUnderline;
+    private TextView tabInProgress, tabPending, tabCancelled;
+
     private void bindViews() {
         taskList = findViewById(R.id.taskList);
         taskState = findViewById(R.id.txtTaskState);
         searchInput = findViewById(R.id.edtSearchTask);
-        tabAll = findViewById(R.id.tabAllTasks);
-        tabTodo = findViewById(R.id.tabTodoTasks);
-        tabDoing = findViewById(R.id.tabDoingTasks);
-        tabDone = findViewById(R.id.tabDoneTasks);
+        tabAll = findViewById(R.id.tabAll);
+        tabInProgress = findViewById(R.id.tabInProgress);
+        tabPending = findViewById(R.id.tabPending);
+        tabDone = findViewById(R.id.tabDone);
+        tabCancelled = findViewById(R.id.tabCancelled);
+        
+        tabAllUnderline = findViewById(R.id.tabAllUnderline);
+        tabInProgressUnderline = findViewById(R.id.tabInProgressUnderline);
+        tabPendingUnderline = findViewById(R.id.tabPendingUnderline);
+        tabDoneUnderline = findViewById(R.id.tabDoneUnderline);
+        tabCancelledUnderline = findViewById(R.id.tabCancelledUnderline);
     }
 
     private void setupActions() {
-        tabAll.setOnClickListener(v -> setFilter(FILTER_ALL));
-        tabTodo.setOnClickListener(v -> setFilter(FILTER_TODO));
-        tabDoing.setOnClickListener(v -> setFilter(FILTER_DOING));
-        tabDone.setOnClickListener(v -> setFilter(FILTER_DONE));
+        View mainLayout = findViewById(android.R.id.content);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), 0);
+                return windowInsets;
+            });
+        }
+
+        View.OnClickListener allListener = v -> setFilter(FILTER_ALL);
+        View.OnClickListener inProgressListener = v -> setFilter(Task.STATUS_IN_PROGRESS);
+        View.OnClickListener pendingListener = v -> setFilter(Task.STATUS_PENDING);
+        View.OnClickListener doneListener = v -> setFilter(Task.STATUS_DONE);
+        View.OnClickListener cancelledListener = v -> setFilter(Task.STATUS_CANCELLED);
+
+        tabAll.setOnClickListener(allListener);
+        tabInProgress.setOnClickListener(inProgressListener);
+        tabPending.setOnClickListener(pendingListener);
+        tabDone.setOnClickListener(doneListener);
+        tabCancelled.setOnClickListener(cancelledListener);
+        
+        if (tabAll.getParent() instanceof View) ((View)tabAll.getParent()).setOnClickListener(allListener);
+        if (tabInProgress.getParent() instanceof View) ((View)tabInProgress.getParent()).setOnClickListener(inProgressListener);
+        if (tabPending.getParent() instanceof View) ((View)tabPending.getParent()).setOnClickListener(pendingListener);
+        if (tabDone.getParent() instanceof View) ((View)tabDone.getParent()).setOnClickListener(doneListener);
+        if (tabCancelled.getParent() instanceof View) ((View)tabCancelled.getParent()).setOnClickListener(cancelledListener);
+
         updateTabs();
 
         searchInput.addTextChangedListener(new TextWatcher() {
@@ -100,15 +136,24 @@ public class TasksActivity extends Activity {
     }
 
     private void updateTabs() {
-        styleTab(tabAll, FILTER_ALL.equals(currentFilter));
-        styleTab(tabTodo, FILTER_TODO.equals(currentFilter));
-        styleTab(tabDoing, FILTER_DOING.equals(currentFilter));
-        styleTab(tabDone, FILTER_DONE.equals(currentFilter));
+        styleTab(tabAll, FILTER_ALL.equals(currentFilter), tabAllUnderline);
+        styleTab(tabInProgress, Task.STATUS_IN_PROGRESS.equals(currentFilter), tabInProgressUnderline);
+        styleTab(tabPending, Task.STATUS_PENDING.equals(currentFilter), tabPendingUnderline);
+        styleTab(tabDone, Task.STATUS_DONE.equals(currentFilter), tabDoneUnderline);
+        styleTab(tabCancelled, Task.STATUS_CANCELLED.equals(currentFilter), tabCancelledUnderline);
     }
 
-    private void styleTab(TextView tab, boolean selected) {
-        tab.setTextColor(selected ? Color.rgb(34, 197, 94) : Color.rgb(125, 132, 150));
-        tab.setTypeface(null, selected ? Typeface.BOLD : Typeface.NORMAL);
+    private void styleTab(TextView tab, boolean selected, View underline) {
+        if (tab == null) return;
+        if (selected) {
+            tab.setTextColor(Color.parseColor("#15B759"));
+            tab.setTypeface(null, Typeface.BOLD);
+            if (underline != null) underline.setVisibility(View.VISIBLE);
+        } else {
+            tab.setTextColor(Color.parseColor("#7D8496"));
+            tab.setTypeface(null, Typeface.NORMAL);
+            if (underline != null) underline.setVisibility(View.INVISIBLE);
+        }
     }
 
     private void loadTasks() {
@@ -150,11 +195,12 @@ public class TasksActivity extends Activity {
 
         taskState.setText("Hiển thị " + filteredTasks.size() + " công việc của bạn.");
         for (Task task : filteredTasks) {
-            View card = ViewFactory.taskCard(
+            View card = ViewFactory.detailedTaskCard(
                     this,
                     task.getTitle(),
-                    valueOrDefault(task.getProjectName(), "Dự án") + " - "
-                            + valueOrDefault(task.getDueDate(), "Chưa có hạn"),
+                    "Nhóm: " + valueOrDefault(task.getProjectName(), "Dự án"),
+                    valueOrDefault(task.getDueDate(), "Chưa có hạn"),
+                    valueOrDefault(task.getPriority(), "Trung bình"),
                     task.getStatus(),
                     badgeBackground(task.getStatus()),
                     badgeColor(task.getStatus())
