@@ -214,14 +214,17 @@ public class TasksActivity extends Activity {
         if (!currentKeyword.isEmpty()) {
             return "Không có công việc phù hợp.";
         }
-        if (FILTER_TODO.equals(currentFilter)) {
-            return "Không có công việc chưa làm.";
-        }
-        if (FILTER_DOING.equals(currentFilter)) {
+        if (Task.STATUS_IN_PROGRESS.equals(currentFilter)) {
             return "Không có công việc đang làm.";
         }
-        if (FILTER_DONE.equals(currentFilter)) {
+        if (Task.STATUS_PENDING.equals(currentFilter)) {
+            return "Không có công việc đang chờ.";
+        }
+        if (Task.STATUS_DONE.equals(currentFilter)) {
             return "Không có công việc đã xong.";
+        }
+        if (Task.STATUS_CANCELLED.equals(currentFilter)) {
+            return "Không có công việc đã hủy.";
         }
         return "Bạn chưa được giao công việc nào.";
     }
@@ -236,18 +239,23 @@ public class TasksActivity extends Activity {
     }
 
     private boolean matchesFilter(Task task) {
-        if (FILTER_TODO.equals(currentFilter)) {
-            return Task.STATUS_NOT_STARTED.equals(task.getStatus());
+        if (FILTER_ALL.equals(currentFilter)) {
+            return true;
         }
-        if (FILTER_DOING.equals(currentFilter)) {
+        if (Task.STATUS_IN_PROGRESS.equals(currentFilter)) {
             return Task.STATUS_IN_PROGRESS.equals(task.getStatus());
         }
-        if (FILTER_DONE.equals(currentFilter)) {
+        if (Task.STATUS_PENDING.equals(currentFilter)) {
+            return Task.STATUS_PENDING.equals(task.getStatus());
+        }
+        if (Task.STATUS_DONE.equals(currentFilter)) {
             return Task.STATUS_DONE.equals(task.getStatus());
+        }
+        if (Task.STATUS_CANCELLED.equals(currentFilter)) {
+            return Task.STATUS_CANCELLED.equals(task.getStatus());
         }
         return true;
     }
-
     private boolean contains(String value) {
         return value != null && value.toLowerCase().contains(currentKeyword);
     }
@@ -274,6 +282,9 @@ public class TasksActivity extends Activity {
         }
         if (Task.STATUS_IN_PROGRESS.equals(status)) {
             return Color.rgb(239, 173, 68);
+        }
+        if (Task.STATUS_CANCELLED.equals(status)) {
+            return Color.rgb(239, 68, 68);
         }
         return Color.rgb(34, 197, 94);
     }

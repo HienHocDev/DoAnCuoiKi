@@ -320,10 +320,20 @@ public class HomeActivity extends Activity {
         for (int i = 0; i < limit; i++) {
             com.example.doancuoiki.model.ActivityLog log = logs.get(i);
 
+            if ("comment".equalsIgnoreCase(log.getType())) {
+                continue;
+            }
+
             String uName = valueOrDefault(log.getUserName(), "Thành viên");
             String action = valueOrDefault(log.getActionText(), "đã cập nhật");
             String target = log.getTargetName();
-            String icon = log.isComment() ? "💬 " : "✅ ";
+
+            String icon = "✅ ";
+            if ("project".equalsIgnoreCase(log.getType())) {
+                icon = "📁 ";
+            } else if ("task".equalsIgnoreCase(log.getType())) {
+                icon = "📝 ";
+            }
 
             // Logic kiểm tra targetName để đóng mở ngoặc nháy kép thông minh
             String title;
