@@ -4,7 +4,7 @@
     android:id="@+id/main_home_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_app">
+    android:background="#F8FAFC">
 
     <ScrollView
         android:layout_width="match_parent"
@@ -54,10 +54,10 @@
                 android:id="@+id/txtHomeAvatar"
                 android:layout_width="46dp"
                 android:layout_height="46dp"
-                android:background="@drawable/bg_avatar_home"
+                android:background="@drawable/bg_summary_gradient"
                 android:gravity="center"
                 android:text="TF"
-                android:textColor="#22C55E"
+                android:textColor="#15B759"
                 android:textSize="16sp"
                 android:textStyle="bold" />
         </LinearLayout>
@@ -66,7 +66,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="22dp"
-                android:background="@drawable/bg_summary"
+                android:background="@drawable/bg_summary_gradient"
                 android:orientation="vertical"
                 android:padding="20dp">
 
@@ -74,7 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Tổng quan dự án"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#15B759"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
@@ -84,7 +84,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:text="Theo dõi tiến độ công việc nhóm của bạn"
-                    android:textColor="#DDE0FF"
+                    android:textColor="#7D8496"
                     android:textSize="13sp" />
 
                 <LinearLayout
@@ -99,10 +99,10 @@
                         android:layout_height="match_parent"
                         android:layout_marginRight="8dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_summary_inner"
+                        android:background="@drawable/bg_stat_box"
                         android:gravity="center"
                         android:text="0\nDự án"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#15B759"
                         android:textStyle="bold" />
 
                     <TextView
@@ -111,10 +111,10 @@
                         android:layout_height="match_parent"
                         android:layout_marginRight="8dp"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_summary_inner"
+                        android:background="@drawable/bg_stat_box"
                         android:gravity="center"
                         android:text="0\nCông việc"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#15B759"
                         android:textStyle="bold" />
 
                     <TextView
@@ -122,10 +122,10 @@
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
                         android:layout_weight="1"
-                        android:background="@drawable/bg_summary_inner"
+                        android:background="@drawable/bg_stat_box"
                         android:gravity="center"
                         android:text="0\nHoàn thành"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#15B759"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>

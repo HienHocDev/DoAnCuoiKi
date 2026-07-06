@@ -1,49 +1,96 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_app"
-    android:orientation="vertical">
+    android:background="#FAFAFA">
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomNavContainer"
+        android:clipToPadding="false"
+        android:paddingBottom="80dp">
 
-        <LinearLayout style="@style/ScreenContent">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
 
+            <!-- Header Row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="4dp">
+                
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Lịch"
+                        android:textColor="#222632"
+                        android:textSize="28sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+                
+                <LinearLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_calendar_badge"
+                    android:gravity="center">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="📅"
+                        android:textSize="20sp" />
+                </LinearLayout>
+            </LinearLayout>
+            
             <TextView
-                style="@style/ScreenTitle"
-                android:text="Lịch"
-                />
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Ngày có chấm vàng là ngày có công việc đến hạn"
+                android:textColor="#7D8496"
+                android:textSize="13sp"
+                android:layout_marginBottom="24dp" />
 
-            <TextView
-                style="@style/ScreenSubtitle"
-                android:text="Ngày có chấm vàng là ngày có công việc đến hạn" />
-
+            <!-- Calendar Card -->
             <LinearLayout
                 android:id="@+id/customCalendar"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="18dp"
                 android:background="@drawable/bg_card"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:paddingLeft="16dp"
+                android:paddingTop="20dp"
+                android:paddingRight="16dp"
+                android:paddingBottom="24dp">
 
+                <!-- Calendar Header -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="44dp"
                     android:gravity="center_vertical"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="16dp">
 
                     <TextView
                         android:id="@+id/btnPreviousMonth"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_calendar_circle_btn"
                         android:gravity="center"
-                        android:text="‹"
-                        android:textColor="#222632"
-                        android:textSize="28sp"
+                        android:text="&lt;"
+                        android:textColor="#15B759"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
 
                     <TextView
@@ -52,33 +99,34 @@
                         android:layout_height="match_parent"
                         android:layout_weight="1"
                         android:gravity="center"
-                        android:text="Tháng"
-                        android:textColor="#222632"
-                        android:textSize="15sp"
+                        android:text="Tháng 7, 2026"
+                        android:textColor="#15B759"
+                        android:textSize="16sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:id="@+id/btnNextMonth"
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:background="@drawable/bg_calendar_circle_btn"
                         android:gravity="center"
-                        android:text="›"
-                        android:textColor="#222632"
-                        android:textSize="28sp"
+                        android:text="&gt;"
+                        android:textColor="#15B759"
+                        android:textSize="20sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
                 <GridLayout
                     android:id="@+id/calendarWeekHeader"
                     android:layout_width="match_parent"
-                    android:layout_height="32dp"
+                    android:layout_height="36dp"
                     android:columnCount="7"
                     android:rowCount="1" />
 
                 <GridLayout
                     android:id="@+id/calendarDayGrid"
                     android:layout_width="match_parent"
-                    android:layout_height="252dp"
+                    android:layout_height="270dp"
                     android:columnCount="7"
                     android:rowCount="6" />
             </LinearLayout>
@@ -87,28 +135,78 @@
                 android:id="@+id/txtSelectedDate"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
-                android:text="Công việc trong ngày"
+                android:layout_marginTop="24dp"
+                android:text="Công việc ngày 02/07/2026"
                 android:textColor="#222632"
-                android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="16dp" />
 
             <TextView
                 android:id="@+id/txtCalendarState"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Đang tải công việc..."
+                android:gravity="center"
                 android:textColor="#7D8496"
-                android:textSize="13sp" />
+                android:visibility="gone" />
 
             <LinearLayout
                 android:id="@+id/calendarTaskList"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical" />
+                
+            <!-- Empty State -->
+            <LinearLayout
+                android:id="@+id/emptyStateContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_card"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:padding="32dp"
+                android:visibility="gone">
+                
+                <!-- Graphic -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:gravity="center"
+                    android:orientation="horizontal">
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✨" android:textSize="24sp" android:layout_marginEnd="20dp" android:layout_marginBottom="40dp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="📋" android:textSize="70sp" />
+                    <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="✨" android:textSize="20sp" android:layout_marginStart="20dp" android:layout_marginTop="40dp" />
+                </LinearLayout>
+                
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Không có công việc đến hạn"
+                    android:textColor="#222632"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_marginTop="16dp" />
+                    
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Bạn đã hoàn thành tất cả công việc trong ngày này!"
+                    android:textColor="#7D8496"
+                    android:textSize="12sp"
+                    android:gravity="center"
+                    android:layout_marginTop="8dp" />
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
+    
 
-    <include layout="@layout/bottom_nav" />
-</LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/bottomNavContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true">
+        <include layout="@layout/bottom_nav" />
+    </FrameLayout>
+</RelativeLayout>

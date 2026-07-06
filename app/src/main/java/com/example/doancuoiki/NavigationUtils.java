@@ -38,11 +38,11 @@ public final class NavigationUtils {
     }
 
     public static void showDeveloping(Activity activity, String featureName) {
-        Toast.makeText(activity, featureName + " đang phát triển", Toast.LENGTH_SHORT).show();
+        com.example.doancuoiki.utils.DialogUtils.showSuccessNotification(activity, featureName + " đang phát triển");
     }
 
     public static void showMessage(Activity activity, String message) {
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+        com.example.doancuoiki.utils.DialogUtils.showSuccessNotification(activity, message);
     }
 
     private static void setupItem(Activity activity, int viewId, int iconId, int labelId,
@@ -53,8 +53,8 @@ public final class NavigationUtils {
         }
 
         boolean selected = tab.equals(selectedTab);
-        int color = selected ? Color.rgb(34, 197, 94) : Color.rgb(125, 132, 150);
-        item.setBackgroundResource(selected ? R.drawable.bg_nav_selected : 0);
+        int color = selected ? Color.parseColor("#15B759") : Color.rgb(125, 132, 150);
+        item.setBackgroundResource(selected ? R.drawable.bg_nav_active : 0);
 
         ImageView icon = activity.findViewById(iconId);
         if (icon != null) {

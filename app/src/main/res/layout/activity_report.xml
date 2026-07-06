@@ -1,32 +1,26 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_app">
 
     <LinearLayout style="@style/ScreenContent">
 
-        <TextView
-            android:id="@+id/btnBack"
-            style="@style/BackButton" />
+        <ImageView
+        android:id="@+id/btnBack"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        
+        android:background="@drawable/bg_back_button_outlined"
+        android:src="@drawable/ic_back_u_turn"
+        app:tint="#7D8496"
+        android:padding="8dp" />
 
         <TextView
             style="@style/ScreenTitle"
             android:text="Báo cáo tiến độ"
             />
-
-        <TextView
-            style="@style/ScreenSubtitle"
-            android:text="Tổng hợp tiến độ từ công việc của bạn" />
-
-        <TextView
-            android:id="@+id/txtReportState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:text="Đang tải báo cáo..."
-            android:textColor="#7D8496"
-            android:textSize="13sp" />
 
         <TextView
             android:id="@+id/txtOverallProgress"

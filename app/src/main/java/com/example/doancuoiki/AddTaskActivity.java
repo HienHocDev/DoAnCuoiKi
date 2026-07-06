@@ -7,6 +7,10 @@ import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.TextView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doancuoiki.model.Project;
 import com.example.doancuoiki.model.Task;
@@ -15,6 +19,7 @@ import com.example.doancuoiki.repository.ProjectRepository;
 import com.example.doancuoiki.repository.TaskRepository;
 import com.example.doancuoiki.repository.UserRepository;
 import com.example.doancuoiki.utils.DateUtils;
+import com.example.doancuoiki.utils.VietnameseInputUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -42,6 +47,10 @@ public class AddTaskActivity extends Activity {
     private Spinner projectSpinner;
     private Spinner assigneeSpinner;
     private Spinner prioritySpinner;
+    private Spinner categorySpinner;
+    private Spinner reminderTypeSpinner;
+    private EditText edtReminderTime;
+    private TextView txtCharCount;
     private String currentUserId = "";
     private String requestedProjectId;
 
@@ -49,6 +58,15 @@ public class AddTaskActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
+
+        View mainLayout = findViewById(R.id.main_layout);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
+                return windowInsets;
+            });
+        }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -76,12 +94,26 @@ public class AddTaskActivity extends Activity {
         projectSpinner = findViewById(R.id.spinnerProject);
         assigneeSpinner = findViewById(R.id.spinnerAssignee);
         prioritySpinner = findViewById(R.id.spinnerPriority);
+        categorySpinner = findViewById(R.id.spinnerCategory);
+        reminderTypeSpinner = findViewById(R.id.spinnerReminderType);
+        edtReminderTime = findViewById(R.id.edtReminderTime);
+        txtCharCount = findViewById(R.id.txtCharCount);
+
+        VietnameseInputUtils.setupSingleLine(titleInput);
+        VietnameseInputUtils.setupMultiLine(descriptionInput);
     }
 
     private void setupActions() {
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
         findViewById(R.id.btnSaveTask).setOnClickListener(v -> saveTask());
         dueDateInput.setOnClickListener(v -> showDatePicker());
+        
+        edtReminderTime.setOnClickListener(v -> {
+            java.util.Calendar c = java.util.Calendar.getInstance();
+            new android.app.TimePickerDialog(this, (view, hourOfDay, minute) -> {
+                edtReminderTime.setText(String.format(java.util.Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
+            }, c.get(java.util.Calendar.HOUR_OF_DAY), c.get(java.util.Calendar.MINUTE), true).show();
+        });
         projectSpinner.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(android.widget.AdapterView<?> parent, View view,
@@ -97,6 +129,8 @@ public class AddTaskActivity extends Activity {
 
     private void setupSpinners() {
         setSpinnerItems(prioritySpinner, Arrays.asList("Thấp", "Trung bình", "Cao"));
+        setSpinnerItems(categorySpinner, Arrays.asList("Học tập", "Công việc", "Cá nhân"));
+        setSpinnerItems(reminderTypeSpinner, Arrays.asList("Không nhắc", "1 giờ", "1 ngày", "3 ngày"));
     }
 
     private void loadOwnedProjects() {
@@ -240,12 +274,37 @@ public class AddTaskActivity extends Activity {
                 today,
                 valueOrDefault(dueDateInput.getText().toString(), "Chưa có hạn")
         );
+        
+        task.setReminderTime(valueOrDefault(edtReminderTime.getText().toString(), ""));
+        task.setReminderType(selectedSpinnerText(reminderTypeSpinner));
 
         taskRepository.addTask(task, new TaskRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
-                NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc");
-                finish();
+                com.example.doancuoiki.utils.AlarmUtils.scheduleTaskAlarm(AddTaskActivity.this, task);
+                
+                com.example.doancuoiki.model.NotificationItem notif = new com.example.doancuoiki.model.NotificationItem(
+                        null,
+                        task.getAssigneeId(),
+                        "Bạn được giao công việc",
+                        task.getTitle() + " - " + task.getProjectName(),
+                        "task_assigned",
+                        false,
+                        "",
+                        task.getId()
+                );
+                new com.example.doancuoiki.repository.NotificationRepository().addNotification(notif, new com.example.doancuoiki.repository.NotificationRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc");
+                        finish();
+                    }
+                    @Override
+                    public void onError(Exception e) {
+                        NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc (Lỗi thông báo)");
+                        finish();
+                    }
+                });
             }
 
             @Override

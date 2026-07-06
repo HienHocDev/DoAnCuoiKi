@@ -1,69 +1,341 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/main_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/bg_app">
+    android:background="#FAFAFA">
 
-    <LinearLayout style="@style/ScreenContent">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_above="@id/bottomSection"
+        android:clipToPadding="false"
+        android:paddingBottom="20dp">
 
-        <TextView
-            android:id="@+id/btnBack"
-            style="@style/BackButton" />
-
-        <TextView
-            style="@style/ScreenTitle"
-            android:text="Thêm dự án" />
-
-        <TextView
-            style="@style/ScreenSubtitle"
-            android:text="Bạn sẽ là chủ dự án và có thể thêm thành viên sau" />
-
-        <EditText
-            android:id="@+id/edtProjectName"
-            style="@style/FormInput"
-            android:hint="Tên dự án" />
-
-        <EditText
-            android:id="@+id/edtProjectDescription"
-            style="@style/FormInput"
-            android:hint="Mô tả"
-            android:minLines="3" />
-
-        <EditText
-            android:id="@+id/edtStartDate"
-            style="@style/FormInput"
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="Ngày bắt đầu" />
-
-        <EditText
-            android:id="@+id/edtEndDate"
-            style="@style/FormInput"
-            android:clickable="true"
-            android:focusable="false"
-            android:hint="Ngày kết thúc" />
-
-        <TextView
-            android:id="@+id/txtMemberHint"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="Sau khi tạo, mở dự án để thêm thành viên và giao công việc."
-            android:textColor="#7D8496"
-            android:textSize="12sp" />
+            android:orientation="vertical"
+            android:padding="20dp">
 
+            <!-- Header -->
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_toStartOf="@id/graphicContainer"
+                    android:layout_marginEnd="16dp">
+
+                    <ImageView
+                        android:id="@+id/btnBack"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/bg_back_button_outlined"
+                        android:padding="8dp"
+                        android:src="@drawable/ic_back_u_turn"
+                        app:tint="#7D8496" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Thêm dự án"
+                        android:textColor="#222632"
+                        android:textSize="26sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:text="Bạn sẽ là chủ dự án và có thể thêm thành viên sau"
+                        android:textColor="#7D8496"
+                        android:textSize="13sp" />
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/graphicContainer"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="20dp"
+                    android:src="@drawable/ic_project_graphic" />
+            </RelativeLayout>
+
+            <!-- Project Name -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_card_new"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_icon_green_light"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_briefcase" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Tên dự án"
+                        android:textColor="#222632"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtProjectName"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:hint="Nhập tên dự án"
+                        android:inputType="textCapSentences"
+                        android:paddingTop="4dp"
+                        android:textColor="#222632"
+                        android:textColorHint="#94A3B8"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Project Description -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_card_new"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_icon_blue_light"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_menu_lines" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mô tả"
+                        android:textColor="#222632"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtProjectDescription"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="top|start"
+                        android:hint="Nhập mô tả dự án"
+                        android:inputType="textCapSentences|textMultiLine"
+                        android:minLines="2"
+                        android:paddingTop="4dp"
+                        android:textColor="#222632"
+                        android:textColorHint="#94A3B8"
+                        android:textSize="14sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Start Date -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_card_new"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_icon_purple_light"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_calendar_purple" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ngày bắt đầu"
+                        android:textColor="#222632"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtStartDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:hint="Chọn ngày bắt đầu"
+                        android:paddingTop="4dp"
+                        android:textColor="#222632"
+                        android:textColorHint="#94A3B8"
+                        android:textSize="14sp" />
+                </LinearLayout>
+                
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_nav_calendar"
+                    app:tint="#CBD5E1" />
+            </LinearLayout>
+
+            <!-- End Date -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:background="@drawable/bg_input_card_new"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="48dp"
+                    android:layout_height="48dp"
+                    android:background="@drawable/bg_icon_yellow_light"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:src="@drawable/ic_flag_yellow" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Ngày kết thúc"
+                        android:textColor="#222632"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <EditText
+                        android:id="@+id/edtEndDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:clickable="true"
+                        android:focusable="false"
+                        android:hint="Chọn ngày kết thúc"
+                        android:paddingTop="4dp"
+                        android:textColor="#222632"
+                        android:textColorHint="#94A3B8"
+                        android:textSize="14sp" />
+                </LinearLayout>
+                
+                <ImageView
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:src="@drawable/ic_nav_calendar"
+                    app:tint="#CBD5E1" />
+            </LinearLayout>
+
+            <!-- Notice Card -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_notice_card"
+                android:gravity="center_vertical"
+                android:padding="16dp">
+
+                <LinearLayout
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:background="@drawable/bg_icon_notice_circle"
+                    android:gravity="center">
+                    <ImageView
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:src="@drawable/ic_lightbulb_white" />
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:text="Sau khi tạo, bạn có thể thêm thành viên và giao công việc cho dự án."
+                    android:textColor="#222632"
+                    android:textSize="12sp"
+                    android:lineSpacingExtra="2dp"/>
+            </LinearLayout>
+            
+            <TextView
+                android:id="@+id/txtCreateState"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="#7D8496"
+                android:textSize="13sp" />
+
+        </LinearLayout>
+    </ScrollView>
+    
+    <!-- Bottom Section for Button -->
+    <LinearLayout
+        android:id="@+id/bottomSection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:background="#FAFAFA"
+        android:padding="20dp">
+        
         <TextView
-            android:id="@+id/txtCreateState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:textColor="#7D8496"
-            android:textSize="13sp" />
-
-        <Button
             android:id="@+id/btnCreateProject"
-            style="@style/PrimaryButton"
-            android:layout_marginTop="28dp"
-            android:text="Tạo dự án" />
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:background="@drawable/bg_button_primary"
+            android:gravity="center"
+            android:text="+ Tạo dự án"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold" />
     </LinearLayout>
-</ScrollView>
+
+</RelativeLayout>

@@ -4,6 +4,8 @@ public class Task {
     public static final String STATUS_NOT_STARTED = "Chưa bắt đầu";
     public static final String STATUS_IN_PROGRESS = "Đang làm";
     public static final String STATUS_DONE = "Hoàn thành";
+    public static final String STATUS_PENDING = "Đang chờ";
+    public static final String STATUS_CANCELLED = "Đã hủy";
 
     private String id;
     private String projectId;
@@ -17,6 +19,9 @@ public class Task {
     private String priority;
     private String startDate;
     private String dueDate;
+    private String category;
+    private String reminderTime;
+    private String reminderType;
 
     public Task() {
     }
@@ -132,5 +137,29 @@ public class Task {
 
     public void setDueDate(String dueDate) {
         this.dueDate = dueDate;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
+    }
+
+    public String getReminderTime() {
+        return reminderTime;
+    }
+
+    public void setReminderTime(String reminderTime) {
+        this.reminderTime = reminderTime;
+    }
+
+    public String getReminderType() {
+        return reminderType;
+    }
+
+    public void setReminderType(String reminderType) {
+        this.reminderType = reminderType;
     }
 }

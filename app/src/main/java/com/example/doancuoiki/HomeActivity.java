@@ -62,7 +62,7 @@ public class HomeActivity extends Activity {
         setContentView(R.layout.activity_home);
         NavigationUtils.setupBottomNav(this, NavigationUtils.HOME);
 
-        RelativeLayout mainLayout = findViewById(R.id.main_home_layout);
+        android.view.View mainLayout = findViewById(android.R.id.content);
         if (mainLayout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
                 Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -143,13 +143,37 @@ public class HomeActivity extends Activity {
             newTask.setStatus(Task.STATUS_NOT_STARTED);
             newTask.setDueDate(todayStr);
             newTask.setCreatorId(currentUserId);
+            newTask.setAssigneeId(currentUserId);
             newTask.setProjectId("");
 
             // 2. Đẩy lên TaskRepository
             taskRepository.addTask(newTask, new TaskRepository.SimpleCallback() {
                 @Override
                 public void onSuccess() {
-                    Toast.makeText(HomeActivity.this, "Đã thêm việc hôm nay!", Toast.LENGTH_SHORT).show();
+                    com.example.doancuoiki.model.NotificationItem notif = new com.example.doancuoiki.model.NotificationItem(
+                            null,
+                            currentUserId,
+                            "Bạn được giao công việc",
+                            newTask.getTitle() + " - Cá nhân",
+                            "task_assigned",
+                            false,
+                            "",
+                            newTask.getId()
+                    );
+                    new com.example.doancuoiki.repository.NotificationRepository().addNotification(notif, new com.example.doancuoiki.repository.NotificationRepository.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            input.setText("");
+                            NavigationUtils.showMessage(HomeActivity.this, "Đã thêm công việc nhanh");
+                            loadProjects();
+                        }
+                        @Override
+                        public void onError(Exception e) {
+                            input.setText("");
+                            NavigationUtils.showMessage(HomeActivity.this, "Đã thêm công việc nhanh");
+                            loadProjects();
+                        }
+                    });
 
                     com.example.doancuoiki.model.ActivityLog log = new com.example.doancuoiki.model.ActivityLog();
                     log.setProjectId("");
@@ -320,10 +344,20 @@ public class HomeActivity extends Activity {
         for (int i = 0; i < limit; i++) {
             com.example.doancuoiki.model.ActivityLog log = logs.get(i);
 
+            if ("comment".equalsIgnoreCase(log.getType())) {
+                continue;
+            }
+
             String uName = valueOrDefault(log.getUserName(), "Thành viên");
             String action = valueOrDefault(log.getActionText(), "đã cập nhật");
             String target = log.getTargetName();
-            String icon = log.isComment() ? "💬 " : "✅ ";
+
+            String icon = "✅ ";
+            if ("project".equalsIgnoreCase(log.getType())) {
+                icon = "📁 ";
+            } else if ("task".equalsIgnoreCase(log.getType())) {
+                icon = "📝 ";
+            }
 
             // Logic kiểm tra targetName để đóng mở ngoặc nháy kép thông minh
             String title;
