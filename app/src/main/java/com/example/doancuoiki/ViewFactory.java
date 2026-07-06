@@ -269,7 +269,7 @@ public final class ViewFactory {
         iconBox.setGravity(Gravity.CENTER);
         iconBox.setBackground(makeRoundBg(Color.parseColor("#E6F9ED"), dp(context, 12))); // Light green box
         
-        TextView icon = text(context, "Activity".equals(time) ? "✓" : "📅", 20, true, Color.parseColor("#15B759"));
+        TextView icon = text(context, "Activity".equals(time) ? "✓" : "🔔", 20, true, Color.parseColor("#15B759"));
         if (title.contains("bình luận") || title.contains("💬")) {
             iconBox.setBackground(makeRoundBg(Color.parseColor("#E0F2FE"), dp(context, 12))); // Light blue box
             icon.setText("💬");

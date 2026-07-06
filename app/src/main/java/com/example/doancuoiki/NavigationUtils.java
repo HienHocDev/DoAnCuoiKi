@@ -38,11 +38,11 @@ public final class NavigationUtils {
     }
 
     public static void showDeveloping(Activity activity, String featureName) {
-        Toast.makeText(activity, featureName + " đang phát triển", Toast.LENGTH_SHORT).show();
+        com.example.doancuoiki.utils.DialogUtils.showSuccessNotification(activity, featureName + " đang phát triển");
     }
 
     public static void showMessage(Activity activity, String message) {
-        Toast.makeText(activity, message, Toast.LENGTH_SHORT).show();
+        com.example.doancuoiki.utils.DialogUtils.showSuccessNotification(activity, message);
     }
 
     private static void setupItem(Activity activity, int viewId, int iconId, int labelId,

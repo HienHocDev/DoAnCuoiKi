@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doancuoiki.model.NotificationItem;
 import com.example.doancuoiki.model.Task;
@@ -36,12 +39,29 @@ public class NotificationsActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_notifications);
 
+        View mainLayout = findViewById(android.R.id.content);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
+                return windowInsets;
+            });
+        }
+
         notificationList = findViewById(R.id.notificationList);
         notificationState = findViewById(R.id.txtNotificationState);
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         resolveCurrentUser();
         loadNotifications();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (notificationList != null) {
+            loadNotifications();
+        }
     }
 
     private void resolveCurrentUser() {
@@ -59,21 +79,6 @@ public class NotificationsActivity extends Activity {
             @Override
             public void onSuccess(List<NotificationItem> firestoreNotifications) {
                 notifications.addAll(firestoreNotifications);
-                loadTaskBasedNotifications();
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                loadTaskBasedNotifications();
-            }
-        });
-    }
-
-    private void loadTaskBasedNotifications() {
-        taskRepository.getTasksForUser(currentUserId, new TaskRepository.TaskListCallback() {
-            @Override
-            public void onSuccess(List<Task> tasks) {
-                notifications.addAll(createNotificationsFromTasks(tasks));
                 deduplicateNotifications();
                 renderNotifications();
             }
@@ -86,50 +91,7 @@ public class NotificationsActivity extends Activity {
         });
     }
 
-    private List<NotificationItem> createNotificationsFromTasks(List<Task> tasks) {
-        List<NotificationItem> generated = new ArrayList<>();
-        for (Task task : tasks) {
-            if (currentUserId.equals(task.getAssigneeId())) {
-                generated.add(new NotificationItem(
-                        "task-" + task.getId(),
-                        currentUserId,
-                        "Bạn được giao công việc",
-                        task.getTitle() + " - " + task.getProjectName(),
-                        "task_assigned",
-                        false,
-                        "Tự động"
-                ));
-            }
 
-            if (currentUserId.equals(task.getAssigneeId())
-                    && !Task.STATUS_DONE.equals(task.getStatus())
-                    && DateUtils.isDueSoon(task.getDueDate(), 3)) {
-                generated.add(new NotificationItem(
-                        "deadline-" + task.getId(),
-                        currentUserId,
-                        "Công việc sắp đến hạn",
-                        task.getTitle() + " đến hạn vào " + task.getDueDate(),
-                        "task_due_soon",
-                        false,
-                        "Tự động"
-                ));
-            }
-
-            if ((currentUserId.equals(task.getAssigneeId()) || currentUserId.equals(task.getCreatorId()))
-                    && Task.STATUS_DONE.equals(task.getStatus())) {
-                generated.add(new NotificationItem(
-                        "done-" + task.getId(),
-                        currentUserId,
-                        "Công việc đã hoàn thành",
-                        task.getTitle() + " trong dự án " + task.getProjectName(),
-                        "task_done",
-                        true,
-                        "Tự động"
-                ));
-            }
-        }
-        return generated;
-    }
 
     private void deduplicateNotifications() {
         Map<String, NotificationItem> notificationMap = new LinkedHashMap<>();
@@ -142,6 +104,7 @@ public class NotificationsActivity extends Activity {
         }
         notifications.clear();
         notifications.addAll(notificationMap.values());
+        java.util.Collections.reverse(notifications);
     }
 
     private void renderNotifications() {
@@ -160,29 +123,20 @@ public class NotificationsActivity extends Activity {
                     notification.getMessage(),
                     notification.isRead() ? "Đã đọc" : notification.getCreatedAt()
             );
-            String taskId = taskIdFromNotification(notification);
-            if (taskId != null) {
-                card.setOnClickListener(v -> openTaskDetail(taskId));
+            if (notification.getTaskId() != null && !notification.getTaskId().isEmpty()) {
+                card.setOnClickListener(v -> openTaskDetail(notification.getTaskId()));
+            } else if (notification.getId() != null) {
+                // Fallback for old notifications that didn't have taskId saved (if any)
+                String id = notification.getId();
+                if (id.startsWith("task-")) id = id.replace("task-", "");
+                if (id.startsWith("deadline-")) id = id.replace("deadline-", "");
+                if (id.startsWith("done-")) id = id.replace("done-", "");
+                
+                final String finalId = id;
+                card.setOnClickListener(v -> openTaskDetail(finalId));
             }
             notificationList.addView(card);
         }
-    }
-
-    private String taskIdFromNotification(NotificationItem notification) {
-        String id = notification.getId();
-        if (id == null) {
-            return null;
-        }
-        if (id.startsWith("task-")) {
-            return id.substring("task-".length());
-        }
-        if (id.startsWith("deadline-")) {
-            return id.substring("deadline-".length());
-        }
-        if (id.startsWith("done-")) {
-            return id.substring("done-".length());
-        }
-        return null;
     }
 
     private void openTaskDetail(String taskId) {

@@ -8,11 +8,12 @@ public class NotificationItem {
     private String type;
     private boolean read;
     private String createdAt;
+    private String taskId;
 
     public NotificationItem() {
     }
 
-    public NotificationItem(String id, String userId, String title, String message, String type, boolean read, String createdAt) {
+    public NotificationItem(String id, String userId, String title, String message, String type, boolean read, String createdAt, String taskId) {
         this.id = id;
         this.userId = userId;
         this.title = title;
@@ -20,6 +21,7 @@ public class NotificationItem {
         this.type = type;
         this.read = read;
         this.createdAt = createdAt;
+        this.taskId = taskId;
     }
 
     public String getId() {
@@ -76,5 +78,13 @@ public class NotificationItem {
 
     public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public String getTaskId() {
+        return taskId;
+    }
+
+    public void setTaskId(String taskId) {
+        this.taskId = taskId;
     }
 }

@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doancuoiki.model.Project;
 import com.example.doancuoiki.model.Task;
@@ -55,6 +58,15 @@ public class AddTaskActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_task);
+
+        View mainLayout = findViewById(R.id.main_layout);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
+                return windowInsets;
+            });
+        }
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
         if (user == null) {
@@ -262,12 +274,37 @@ public class AddTaskActivity extends Activity {
                 today,
                 valueOrDefault(dueDateInput.getText().toString(), "Chưa có hạn")
         );
+        
+        task.setReminderTime(valueOrDefault(edtReminderTime.getText().toString(), ""));
+        task.setReminderType(selectedSpinnerText(reminderTypeSpinner));
 
         taskRepository.addTask(task, new TaskRepository.SimpleCallback() {
             @Override
             public void onSuccess() {
-                NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc");
-                finish();
+                com.example.doancuoiki.utils.AlarmUtils.scheduleTaskAlarm(AddTaskActivity.this, task);
+                
+                com.example.doancuoiki.model.NotificationItem notif = new com.example.doancuoiki.model.NotificationItem(
+                        null,
+                        task.getAssigneeId(),
+                        "Bạn được giao công việc",
+                        task.getTitle() + " - " + task.getProjectName(),
+                        "task_assigned",
+                        false,
+                        "",
+                        task.getId()
+                );
+                new com.example.doancuoiki.repository.NotificationRepository().addNotification(notif, new com.example.doancuoiki.repository.NotificationRepository.SimpleCallback() {
+                    @Override
+                    public void onSuccess() {
+                        NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc");
+                        finish();
+                    }
+                    @Override
+                    public void onError(Exception e) {
+                        NavigationUtils.showMessage(AddTaskActivity.this, "Đã giao công việc (Lỗi thông báo)");
+                        finish();
+                    }
+                });
             }
 
             @Override

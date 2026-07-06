@@ -118,11 +118,23 @@ public class ProjectRepository {
     }
 
     public void deleteProject(String projectId, SimpleCallback callback) {
-        db.collection(COLLECTION_PROJECTS)
-                .document(projectId)
-                .delete()
-                .addOnSuccessListener(unused -> callback.onSuccess())
-                .addOnFailureListener(callback::onError);
+        db.collection("tasks").whereEqualTo("projectId", projectId).get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    com.google.firebase.firestore.WriteBatch batch = db.batch();
+                    for (com.google.firebase.firestore.DocumentSnapshot doc : queryDocumentSnapshots.getDocuments()) {
+                        batch.delete(doc.getReference());
+                    }
+                    batch.delete(db.collection(COLLECTION_PROJECTS).document(projectId));
+                    
+                    batch.commit()
+                            .addOnSuccessListener(unused -> callback.onSuccess())
+                            .addOnFailureListener(callback::onError);
+                })
+                .addOnFailureListener(e -> {
+                    db.collection(COLLECTION_PROJECTS).document(projectId).delete()
+                            .addOnSuccessListener(unused -> callback.onSuccess())
+                            .addOnFailureListener(callback::onError);
+                });
     }
 
     public interface ActivityListCallback {

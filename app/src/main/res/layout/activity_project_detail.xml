@@ -119,7 +119,7 @@
         <Button
             android:id="@+id/btnOpenReport"
             style="@style/PrimaryButton"
-            android:text="+ Thêm công việc mới" />
+            android:text="Xem báo cáo tiến độ" />
 
         <Button
             android:id="@+id/btnDeleteProject"
