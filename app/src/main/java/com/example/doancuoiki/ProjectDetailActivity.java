@@ -75,6 +75,7 @@ public class ProjectDetailActivity extends Activity {
         if (addTaskButton != null) addTaskButton.setOnClickListener(v -> openAddTask());
         reportButton.setOnClickListener(v -> {
             Intent intent = new Intent(this, ReportActivity.class);
+            intent.putExtra("projectId", projectId);
             startActivity(intent);
         });
         deleteButton.setOnClickListener(v -> confirmDeleteProject());

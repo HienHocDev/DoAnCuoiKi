@@ -23,19 +23,6 @@
             />
 
         <TextView
-            style="@style/ScreenSubtitle"
-            android:text="Tổng hợp tiến độ từ công việc của bạn" />
-
-        <TextView
-            android:id="@+id/txtReportState"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="14dp"
-            android:text="Đang tải báo cáo..."
-            android:textColor="#7D8496"
-            android:textSize="13sp" />
-
-        <TextView
             android:id="@+id/txtOverallProgress"
             android:layout_width="match_parent"
             android:layout_height="150dp"

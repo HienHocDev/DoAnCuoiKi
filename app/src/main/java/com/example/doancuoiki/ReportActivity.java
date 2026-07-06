@@ -4,6 +4,10 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.view.View;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 import com.example.doancuoiki.model.Task;
 import com.example.doancuoiki.repository.TaskRepository;
@@ -19,7 +23,6 @@ public class ReportActivity extends Activity {
 
     private final TaskRepository taskRepository = new TaskRepository();
 
-    private TextView reportState;
     private TextView overallProgress;
     private TextView doneCount;
     private TextView doingCount;
@@ -28,11 +31,23 @@ public class ReportActivity extends Activity {
     private LinearLayout memberList;
     private LinearLayout priorityList;
     private String currentUserId = GUEST_USER_ID;
+    private String projectId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_report);
+
+        View mainLayout = findViewById(android.R.id.content);
+        if (mainLayout != null) {
+            ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
+                Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
+                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), insets.bottom);
+                return windowInsets;
+            });
+        }
+
+        projectId = getIntent().getStringExtra("projectId");
 
         bindViews();
         resolveCurrentUser();
@@ -49,7 +64,6 @@ public class ReportActivity extends Activity {
     }
 
     private void bindViews() {
-        reportState = findViewById(R.id.txtReportState);
         overallProgress = findViewById(R.id.txtOverallProgress);
         doneCount = findViewById(R.id.txtDoneCount);
         doingCount = findViewById(R.id.txtDoingCount);
@@ -67,24 +81,23 @@ public class ReportActivity extends Activity {
     }
 
     private void loadReport() {
-        reportState.setText("Đang tải báo cáo...");
-        taskRepository.getTasksForUser(currentUserId, new TaskRepository.TaskListCallback() {
+        TaskRepository.TaskListCallback callback = new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
-                if (tasks.isEmpty()) {
-                    reportState.setText("Chưa có công việc để tạo báo cáo.");
-                } else {
-                    reportState.setText("Đã tải " + tasks.size() + " công việc từ Firestore.");
-                }
                 renderReport(tasks);
             }
 
             @Override
             public void onError(Exception exception) {
-                reportState.setText("Không tải được báo cáo từ Firestore.");
                 renderReport(java.util.Collections.emptyList());
             }
-        });
+        };
+
+        if (projectId != null && !projectId.isEmpty()) {
+            taskRepository.getTasksByProject(projectId, callback);
+        } else {
+            taskRepository.getTasksForUser(currentUserId, callback);
+        }
     }
 
     private void renderReport(List<Task> tasks) {

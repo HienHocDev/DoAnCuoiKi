@@ -35,4 +35,22 @@ public class NotificationRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
+    public interface SimpleCallback {
+        void onSuccess();
+        void onError(Exception exception);
+    }
+
+    public void addNotification(NotificationItem notification, SimpleCallback callback) {
+        com.google.firebase.firestore.DocumentReference document = db.collection(COLLECTION_NOTIFICATIONS).document();
+        notification.setId(document.getId());
+        
+        String today = new java.text.SimpleDateFormat("dd/MM/yyyy HH:mm", java.util.Locale.getDefault()).format(new java.util.Date());
+        if (notification.getCreatedAt() == null || notification.getCreatedAt().isEmpty()) {
+            notification.setCreatedAt(today);
+        }
+        
+        document.set(notification)
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onError);
+    }
 }

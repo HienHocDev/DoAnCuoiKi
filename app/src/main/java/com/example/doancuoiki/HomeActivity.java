@@ -143,13 +143,37 @@ public class HomeActivity extends Activity {
             newTask.setStatus(Task.STATUS_NOT_STARTED);
             newTask.setDueDate(todayStr);
             newTask.setCreatorId(currentUserId);
+            newTask.setAssigneeId(currentUserId);
             newTask.setProjectId("");
 
             // 2. Đẩy lên TaskRepository
             taskRepository.addTask(newTask, new TaskRepository.SimpleCallback() {
                 @Override
                 public void onSuccess() {
-                    Toast.makeText(HomeActivity.this, "Đã thêm việc hôm nay!", Toast.LENGTH_SHORT).show();
+                    com.example.doancuoiki.model.NotificationItem notif = new com.example.doancuoiki.model.NotificationItem(
+                            null,
+                            currentUserId,
+                            "Bạn được giao công việc",
+                            newTask.getTitle() + " - Cá nhân",
+                            "task_assigned",
+                            false,
+                            "",
+                            newTask.getId()
+                    );
+                    new com.example.doancuoiki.repository.NotificationRepository().addNotification(notif, new com.example.doancuoiki.repository.NotificationRepository.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            input.setText("");
+                            NavigationUtils.showMessage(HomeActivity.this, "Đã thêm công việc nhanh");
+                            loadProjects();
+                        }
+                        @Override
+                        public void onError(Exception e) {
+                            input.setText("");
+                            NavigationUtils.showMessage(HomeActivity.this, "Đã thêm công việc nhanh");
+                            loadProjects();
+                        }
+                    });
 
                     com.example.doancuoiki.model.ActivityLog log = new com.example.doancuoiki.model.ActivityLog();
                     log.setProjectId("");

@@ -13,10 +13,9 @@ import android.widget.TextView;
 
 import com.example.doancuoiki.model.Task;
 import com.example.doancuoiki.repository.TaskRepository;
+import com.example.doancuoiki.NavigationUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-
-import java.util.Arrays;
 
 public class TaskDetailActivity extends Activity {
     public static final String EXTRA_TASK_ID = "taskId";
@@ -31,7 +30,7 @@ public class TaskDetailActivity extends Activity {
     private TextView priorityText;
     private TextView categoryText;
     private TextView reminderText;
-    
+    private TextView createdText;
     
     private Button saveButton;
     private Task currentTask;
@@ -66,6 +65,7 @@ public class TaskDetailActivity extends Activity {
         priorityText = findViewById(R.id.txtTaskPriority);
         categoryText = findViewById(R.id.txtTaskCategory);
         reminderText = findViewById(R.id.txtTaskReminder);
+        createdText = findViewById(R.id.txtTaskCreated);
         saveButton = findViewById(R.id.btnSaveTask);
     }
 
@@ -158,6 +158,11 @@ public class TaskDetailActivity extends Activity {
             }
         }
         reminderText.setText(reminder);
+        
+        if (createdText != null) {
+            String startDate = valueOrDefault(currentTask.getStartDate(), "");
+            createdText.setText("Tạo: " + (startDate.isEmpty() ? "Không xác định" : startDate));
+        }
         
         TextView txtTaskStatus = findViewById(R.id.txtTaskStatus);
         if (txtTaskStatus != null) {
