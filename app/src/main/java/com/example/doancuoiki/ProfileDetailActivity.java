@@ -1,5 +1,6 @@
 package com.example.doancuoiki;
 
+import android.app.DatePickerDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,10 @@ import com.example.doancuoiki.repository.UserRepository;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
+
 public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
 
     private final AuthRepository authRepository = new AuthRepository();
@@ -23,7 +28,8 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
     private ImageView btnBack, detailAvatar;
     private TextView txtProfileName;
     private TextView txtProfileEmail;
-    private EditText editName, editPhone, editAddress;
+
+    private EditText editName, editPhone, editAddress, editEmployeeCode, editBirthDate;
     private Button btnSaveProfile;
 
     private FirebaseUser firebaseUser;
@@ -43,7 +49,34 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
         editName = findViewById(R.id.editName);
         editPhone = findViewById(R.id.editPhone);
         editAddress = findViewById(R.id.editAddress);
+        editEmployeeCode = findViewById(R.id.editEmployeeCode);
+        editBirthDate = findViewById(R.id.editBirthDate);
         btnSaveProfile = findViewById(R.id.btnSaveProfile);
+
+        // KHOÁ KHÔNG CHO GÕ CHỮ VÀO Ô NGÀY SINH ĐỂ BẮT BUỘC CHỌN TỪ LỊCH
+        if (editBirthDate != null) {
+            editBirthDate.setFocusable(false);
+            editBirthDate.setClickable(true);
+
+            // SỰ KIỆN BẤM VÀO Ô NGÀY SINH -> HIỂN THỊ LỊCH ĐỂ CHỌN
+            editBirthDate.setOnClickListener(v -> {
+                Calendar calendar = Calendar.getInstance();
+                int year = calendar.get(Calendar.YEAR);
+                int month = calendar.get(Calendar.MONTH);
+                int day = calendar.get(Calendar.DAY_OF_MONTH);
+
+                DatePickerDialog datePickerDialog = new DatePickerDialog(
+                        ProfileDetailActivity.this,
+                        (view, selectedYear, selectedMonth, selectedDay) -> {
+                            // Định dạng ngày hiển thị dd/MM/yyyy
+                            String formattedDate = String.format("%02d/%02d/%d", selectedDay, (selectedMonth + 1), selectedYear);
+                            editBirthDate.setText(formattedDate);
+                        },
+                        year, month, day
+                );
+                datePickerDialog.show();
+            });
+        }
 
         // 2. Sự kiện nút quay lại và chọn ảnh
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
@@ -62,7 +95,7 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                 txtProfileEmail.setText(firebaseUser.getEmail());
             }
 
-            // Đọc trực tiếp data SĐT và Địa chỉ từ Document Firestore để tránh lỗi model
+            // Đọc dữ liệu SĐT, Địa chỉ, Mã nhân viên, Ngày sinh từ Firestore
             FirebaseFirestore.getInstance().collection("users")
                     .document(firebaseUser.getUid())
                     .get()
@@ -70,13 +103,25 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                         if (documentSnapshot.exists()) {
                             String phone = documentSnapshot.getString("phone");
                             String address = documentSnapshot.getString("address");
+                            String employeeCode = documentSnapshot.getString("employeeCode");
+                            String birthDate = documentSnapshot.getString("birthDate");
 
                             if (editPhone != null && phone != null) editPhone.setText(phone);
                             if (editAddress != null && address != null) editAddress.setText(address);
+
+                            if (editEmployeeCode != null) {
+                                if (employeeCode != null && !employeeCode.isEmpty()) {
+                                    editEmployeeCode.setText(employeeCode);
+                                } else {
+                                    editEmployeeCode.setText("Chưa có mã");
+                                }
+                            }
+
+                            if (editBirthDate != null && birthDate != null) editBirthDate.setText(birthDate);
                         }
                     });
 
-            // Sử dụng repo để lấy Tên hiển thị cũ của bạn
+            // Sử dụng repo để lấy Tên hiển thị cũ
             userRepository.getUser(firebaseUser.getUid(), new UserRepository.UserCallback() {
                 @Override
                 public void onSuccess(User user) {
@@ -101,7 +146,7 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
             });
         }
 
-        // 4. Sự kiện bấm nút LƯU -> Thực hiện cập nhật dữ liệu bằng Firestore Repo mới
+        // 4. Sự kiện bấm nút LƯU -> Cập nhật dữ liệu
         if (btnSaveProfile != null) {
             btnSaveProfile.setOnClickListener(v -> {
                 if (firebaseUser == null) return;
@@ -109,37 +154,39 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                 String updatedName = editName != null ? editName.getText().toString().trim() : "";
                 String updatedPhone = editPhone != null ? editPhone.getText().toString().trim() : "";
                 String updatedAddress = editAddress != null ? editAddress.getText().toString().trim() : "";
+                String updatedBirthDate = editBirthDate != null ? editBirthDate.getText().toString().trim() : "";
 
                 if (updatedName.isEmpty()) {
                     Toast.makeText(this, "Họ tên không được trống!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Gọi hàm Firestore để lưu Số điện thoại và Địa chỉ
-                userRepository.updatePhoneAndAddress(firebaseUser.getUid(), updatedPhone, updatedAddress, new UserRepository.SimpleCallback() {
-                    @Override
-                    public void onSuccess() {
-                        // Sau khi lưu thành công SĐT và địa chỉ, tiến hành cập nhật nốt Tên của bạn
-                        userRepository.updateName(firebaseUser.getUid(), updatedName, new UserRepository.SimpleCallback() {
-                            @Override
-                            public void onSuccess() {
-                                Toast.makeText(ProfileDetailActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
-                                if (txtProfileName != null) txtProfileName.setText(updatedName);
-                                finish();
-                            }
+                Map<String, Object> data = new HashMap<>();
+                data.put("phone", updatedPhone);
+                data.put("address", updatedAddress);
+                data.put("birthDate", updatedBirthDate);
 
-                            @Override
-                            public void onError(Exception exception) {
-                                Toast.makeText(ProfileDetailActivity.this, "Lỗi lưu tên: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-                            }
+                FirebaseFirestore.getInstance().collection("users")
+                        .document(firebaseUser.getUid())
+                        .set(data, com.google.firebase.firestore.SetOptions.merge())
+                        .addOnSuccessListener(unused -> {
+                            userRepository.updateName(firebaseUser.getUid(), updatedName, new UserRepository.SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    Toast.makeText(ProfileDetailActivity.this, "Cập nhật thông tin thành công!", Toast.LENGTH_SHORT).show();
+                                    if (txtProfileName != null) txtProfileName.setText(updatedName);
+                                    finish();
+                                }
+
+                                @Override
+                                public void onError(Exception exception) {
+                                    Toast.makeText(ProfileDetailActivity.this, "Lỗi lưu tên: " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(ProfileDetailActivity.this, "Lỗi lưu thông tin chi tiết!", Toast.LENGTH_SHORT).show();
                         });
-                    }
-
-                    @Override
-                    public void onError(Exception exception) {
-                        Toast.makeText(ProfileDetailActivity.this, "Lỗi lưu SĐT và Địa chỉ!", Toast.LENGTH_SHORT).show();
-                    }
-                });
             });
         }
     }

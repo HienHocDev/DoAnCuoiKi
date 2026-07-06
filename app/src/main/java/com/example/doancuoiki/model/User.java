@@ -7,17 +7,21 @@ public class User {
     private String role;
     private String avatarUrl;
     private Object createdAt;
+    // 1. THÊM THUỘC TÍNH MÃ NHÂN VIÊN VÀO ĐÂY
+    private String employeeCode;
 
     public User() {
     }
 
-    public User(String id, String name, String email, String role, String avatarUrl, Object createdAt) {
+    // 2. CẬP NHẬT HÀM KHỞI TẠO ĐẦY ĐỦ THAM SỐ
+    public User(String id, String name, String email, String role, String avatarUrl, Object createdAt, String employeeCode) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.role = role;
         this.avatarUrl = avatarUrl;
         this.createdAt = createdAt;
+        this.employeeCode = employeeCode;
     }
 
     public String getId() {
@@ -66,5 +70,14 @@ public class User {
 
     public void setCreatedAt(Object createdAt) {
         this.createdAt = createdAt;
+    }
+
+    // 3. THÊM HÀM GETTER VÀ SETTER CHO MÃ NHÂN VIÊN
+    public String getEmployeeCode() {
+        return employeeCode;
+    }
+
+    public void setEmployeeCode(String employeeCode) {
+        this.employeeCode = employeeCode;
     }
 }

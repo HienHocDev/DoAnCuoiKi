@@ -35,10 +35,22 @@ public class UserRepository {
     private static final String COLLECTION_USERS = "users";
     private final FirebaseFirestore db = FirebaseFirestore.getInstance();
 
+    // ==============================================================================
+    // CHUẨN HÓA HÀM TẠO USER: Đóng gói dạng Map để Firestore nhận diện 100%, không bị hủy lệnh
+    // ==============================================================================
     public void createUser(User user, SimpleCallback callback) {
+        Map<String, Object> userData = new HashMap<>();
+        userData.put("id", user.getId());
+        userData.put("name", user.getName());
+        userData.put("email", user.getEmail());
+        userData.put("role", user.getRole());
+        userData.put("avatarUrl", user.getAvatarUrl());
+        userData.put("createdAt", user.getCreatedAt());
+        userData.put("employeeCode", user.getEmployeeCode()); // Lưu mã nhân viên lên Firestore
+
         db.collection(COLLECTION_USERS)
                 .document(user.getId())
-                .set(user)
+                .set(userData)
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onError);
     }
@@ -92,7 +104,6 @@ public class UserRepository {
         getUser(value, callback);
     }
 
-    // NÂNG CẤP CHỐNG LỖI NOT_FOUND: Đổi sang dùng .set và SetOptions.merge()
     public void updateName(String userId, String name, SimpleCallback callback) {
         Map<String, Object> data = new HashMap<>();
         data.put("name", name);
@@ -104,7 +115,6 @@ public class UserRepository {
                 .addOnFailureListener(callback::onError);
     }
 
-    // TÍNH NĂNG CAO CẤP: Lưu link ảnh đại diện (avatarUrl) lên Cloud Firestore
     public void updateAvatar(String uid, String avatarUrl, SimpleCallback callback) {
         Map<String, Object> data = new HashMap<>();
         data.put("avatarUrl", avatarUrl);
@@ -216,6 +226,7 @@ public class UserRepository {
                 })
                 .addOnFailureListener(callback::onError);
     }
+
     public void updatePhoneAndAddress(String uid, String phone, String address, SimpleCallback callback) {
         Map<String, Object> data = new HashMap<>();
         data.put("phone", phone);
@@ -228,5 +239,3 @@ public class UserRepository {
                 .addOnFailureListener(callback::onError);
     }
 }
-
-
