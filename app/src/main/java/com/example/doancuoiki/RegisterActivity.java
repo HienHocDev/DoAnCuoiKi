@@ -53,10 +53,11 @@ public class RegisterActivity extends Activity {
             return;
         }
 
+        // GỌI REPOSITORY: MÃ NHÂN VIÊN SẼ TỰ SINH VÀ LƯU ẨN BÊN TRONG HÀM NÀY
         authRepository.register(name, email, password, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser firebaseUser) {
-                NavigationUtils.showMessage(RegisterActivity.this, "Đăng ký thành công");
+                NavigationUtils.showMessage(RegisterActivity.this, "Đăng ký thành công!");
                 NavigationUtils.openAndFinish(RegisterActivity.this, HomeActivity.class);
             }
 

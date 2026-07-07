@@ -27,7 +27,7 @@ public class ChangePasswordActivity extends Activity {
         btnConfirm = findViewById(R.id.btnConfirm);                 // Thay đúng ID nút Xác nhận
 
         // Nút quay lại trên thanh tiêu đề
-        findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+       findViewById(R.id.btnBack).setOnClickListener(v -> finish());
 
         // 2. Xử lý sự kiện khi bấm nút Xác nhận
         if (btnConfirm != null) {
