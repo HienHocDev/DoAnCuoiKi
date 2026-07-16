@@ -45,7 +45,7 @@
             android:id="@+id/edtEmail"
             style="@style/FormInput"
             android:layout_marginTop="34dp"
-            android:hint="Email"
+            android:hint="Email hoặc Mã nhân viên"
             android:inputType="textEmailAddress" />
 
         <EditText

@@ -40,14 +40,37 @@ public class LoginActivity extends Activity {
     }
 
     private void login() {
-        String email = emailInput.getText().toString().trim();
+        String inputAccount = emailInput.getText().toString().trim();
         String password = passwordInput.getText().toString().trim();
 
-        if (email.isEmpty() || password.isEmpty()) {
-            NavigationUtils.showMessage(this, "Vui lòng nhập email và mật khẩu");
+        if (inputAccount.isEmpty() || password.isEmpty()) {
+            NavigationUtils.showMessage(this, "Vui lòng nhập đầy đủ thông tin");
             return;
         }
 
+        // KIỂM TRA PHƯƠNG THỨC ĐĂNG NHẬP (EMAIL HOẶC MÃ NHÂN VIÊN)
+        if (inputAccount.contains("@")) {
+            // Trường hợp 1: Nếu có dấu @ -> Đăng nhập bằng Email bình thường
+            executeFirebaseLogin(inputAccount, password);
+        } else {
+            // Trường hợp 2: Nếu không có dấu @ -> Gọi Repository quét Mã nhân viên trong Database
+            authRepository.loginWithEmployeeCode(inputAccount, password, new AuthRepository.AuthCallback() {
+                @Override
+                public void onSuccess(FirebaseUser firebaseUser) {
+                    NavigationUtils.showMessage(LoginActivity.this, "Đăng nhập thành công");
+                    NavigationUtils.openAndFinish(LoginActivity.this, HomeActivity.class);
+                }
+
+                @Override
+                public void onError(Exception exception) {
+                    NavigationUtils.showMessage(LoginActivity.this, exception.getMessage());
+                }
+            });
+        }
+    }
+
+    // Hàm phụ trợ thực hiện đăng nhập qua AuthRepository gốc của bạn
+    private void executeFirebaseLogin(String email, String password) {
         authRepository.login(email, password, new AuthRepository.AuthCallback() {
             @Override
             public void onSuccess(FirebaseUser firebaseUser) {

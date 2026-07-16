@@ -89,29 +89,42 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
             });
         }
 
+        // 1. Bấm Thông tin cá nhân
         findViewById(R.id.btnProfileInfo).setOnClickListener(v -> {
             Intent intent = new Intent(AccountActivity.this, ProfileDetailActivity.class);
             startActivity(intent);
         });
 
-        findViewById(R.id.btnManageGroup).setOnClickListener(v -> 
-            Toast.makeText(AccountActivity.this, "Quản lý nhóm: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+        // 2. THÊM VÀO ĐÂY: Bấm Đổi mật khẩu mở thẳng ChangePasswordActivity
+        findViewById(R.id.btnChangePasswordDirect).setOnClickListener(v -> {
+            Intent intent = new Intent(AccountActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
+        });
+
+        // 3. Bấm Quản lý nhóm
+        findViewById(R.id.btnManageGroup).setOnClickListener(v ->
+                Toast.makeText(AccountActivity.this, "Quản lý nhóm: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
         );
 
-        findViewById(R.id.btnMyProjects).setOnClickListener(v -> 
-            Toast.makeText(AccountActivity.this, "Dự án của tôi: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+        // 4. Bấm Dự án của tôi
+        findViewById(R.id.btnMyProjects).setOnClickListener(v ->
+                Toast.makeText(AccountActivity.this, "Dự án của tôi: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
         );
 
-        findViewById(R.id.btnSettings).setOnClickListener(v -> 
-            Toast.makeText(AccountActivity.this, "Cài đặt: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
+        // 5. Bấm Cài đặt
+        findViewById(R.id.btnSettings).setOnClickListener(v ->
+                NavigationUtils.open(this, ChangePasswordActivity.class)
         );
 
+        // 6. Bấm Thông báo
         findViewById(R.id.btnNotificationSetting).setOnClickListener(v ->
                 NavigationUtils.open(this, NotificationsActivity.class));
 
+        // 7. Bấm Trợ giúp
         findViewById(R.id.btnHelp).setOnClickListener(v ->
                 NavigationUtils.showMessage(this, "Trung tâm trợ giúp: đang cập nhật..."));
 
+        // 8. Bấm Đăng xuất (Được làm sạch, không dính code thừa nữa)
         findViewById(R.id.btnLogout).setOnClickListener(v -> {
             authRepository.logout();
             NavigationUtils.openAndFinish(this, LoginActivity.class);
@@ -139,12 +152,13 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
 
             @Override
             public void onError(Exception exception) {
-                // Nếu lỗi mạng, tạo đối tượng User mặc định để app không bị crash
+                // ĐÃ SỬA: Thêm tham số thứ 7 "" (mã nhân viên mặc định) vào cuối để khớp với Model User mới sửa
                 currentUser = new User(
                         firebaseUser.getUid(),
                         valueOrDefault(firebaseUser.getEmail(), "Người dùng"),
                         valueOrDefault(firebaseUser.getEmail(), ""),
                         "Thành viên",
+                        "",
                         "",
                         ""
                 );

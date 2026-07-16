@@ -34,6 +34,33 @@ public class AuthRepository {
                 .addOnFailureListener(callback::onError);
     }
 
+    // ==============================================================================
+    // HÀM XỬ LÝ TRA CỨU MÃ NHÂN VIÊN CHUẨN XÁC VỚI FIRESTORE
+    // ==============================================================================
+    public void loginWithEmployeeCode(String code, String password, AuthCallback callback) {
+        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users") // Đổi sang chữ "users" thường đồng bộ với UserRepository
+                .whereEqualTo("employeeCode", code)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    if (queryDocumentSnapshots != null && !queryDocumentSnapshots.isEmpty() && queryDocumentSnapshots.getDocuments().size() > 0) {
+                        // Tìm thấy tài khoản có mã nhân viên trùng khớp
+                        com.google.firebase.firestore.DocumentSnapshot document = queryDocumentSnapshots.getDocuments().get(0);
+                        String realEmail = document.getString("email");
+
+                        if (realEmail != null && !realEmail.trim().isEmpty()) {
+                            // Thực hiện đăng nhập bằng Email thật vừa tìm được
+                            login(realEmail, password, callback);
+                        } else {
+                            callback.onError(new Exception("Không tìm thấy email liên kết!"));
+                        }
+                    } else {
+                        // Trả về Exception chuẩn để LoginActivity nhận diện đưa vào luồng onError
+                        callback.onError(new Exception("Mã nhân viên không tồn tại!"));
+                    }
+                })
+                .addOnFailureListener(callback::onError);
+    }
+
     public void register(String name, String email, String password, AuthCallback callback) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(result -> {
@@ -43,13 +70,18 @@ public class AuthRepository {
                         return;
                     }
 
+                    // Tự động sinh mã nhân viên ngẫu nhiên
+                    String employeeCode = generateEmployeeCode();
+
+                    // Khởi tạo đối tượng User với tham số Mã nhân viên ở cuối
                     User user = new User(
                             firebaseUser.getUid(),
                             name,
                             email,
                             "Thành viên",
                             "",
-                            now()
+                            now(),
+                            employeeCode
                     );
 
                     userRepository.createUser(user, new UserRepository.SimpleCallback() {
@@ -80,6 +112,12 @@ public class AuthRepository {
     private String now() {
         return new SimpleDateFormat("dd/MM/yyyy HH:mm", Locale.getDefault()).format(new Date());
     }
+
+    private String generateEmployeeCode() {
+        int randomNumber = (int) (Math.random() * 9000) + 1000;
+        return "TF" + randomNumber;
+    }
+
     public void changePasswordDirectly(String currentPassword, String newPassword, SimpleCallback callback) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null || user.getEmail() == null) {
@@ -87,13 +125,11 @@ public class AuthRepository {
             return;
         }
 
-        // Bước 1: Xác thực lại bằng mật khẩu hiện tại
         com.google.firebase.auth.AuthCredential credential =
                 com.google.firebase.auth.EmailAuthProvider.getCredential(user.getEmail(), currentPassword);
 
         user.reauthenticate(credential)
                 .addOnSuccessListener(unused -> {
-                    // Bước 2: Xác thực thành công thì tiến hành đổi mật khẩu mới
                     user.updatePassword(newPassword)
                             .addOnSuccessListener(unused2 -> callback.onSuccess())
                             .addOnFailureListener(callback::onError);
