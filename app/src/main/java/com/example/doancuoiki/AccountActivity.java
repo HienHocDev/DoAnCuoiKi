@@ -19,8 +19,8 @@ import com.example.doancuoiki.repository.AuthRepository;
 import com.example.doancuoiki.repository.UserRepository;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.File;
 import java.net.URL;
-
 public class AccountActivity extends androidx.activity.ComponentActivity {
 
     // Khởi tạo các lớp xử lý dữ liệu từ Firebase
@@ -64,8 +64,12 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // Tải lại dữ liệu mới nhất mỗi khi người dùng quay về màn hình này
+
+        // Tải lại dữ liệu mới nhất
         loadProfile();
+
+        // Tải lại avatar khi quay từ trang Thông tin cá nhân
+        loadSavedAvatar();
     }
 
     /**
@@ -170,17 +174,33 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
      */
     private void renderProfile(User user) {
         String name = valueOrDefault(user.getName(), "Người dùng");
-        profileNameText.setText(name);
-        profileRoleText.setText(valueOrDefault(user.getRole(), "Thành viên") + " - " + valueOrDefault(user.getEmail(), ""));
 
-        String avatarUrl = user.getAvatarUrl();
-        if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
-            // Gọi luồng xử lý ảnh thông minh (Nội bộ + Trực tuyến)
-            loadAvatarFromUrl(avatarUrl, avatarImage);
-        } else {
-            // Nếu không, đặt icon mặc định của hệ thống
-            avatarImage.setImageResource(android.R.drawable.sym_def_app_icon);
-            avatarImage.setBackgroundResource(R.drawable.bg_card);
+        profileNameText.setText(name);
+
+        profileRoleText.setText(
+                valueOrDefault(user.getRole(), "Thành viên")
+                        + " - "
+                        + valueOrDefault(user.getEmail(), "")
+        );
+
+        // Ưu tiên hiển thị avatar đã lưu trong bộ nhớ ứng dụng
+        boolean hasLocalAvatar = loadSavedAvatar();
+
+        // Nếu chưa có ảnh lưu trong máy thì mới dùng avatarUrl hoặc ảnh mặc định
+        if (!hasLocalAvatar) {
+            String avatarUrl = user.getAvatarUrl();
+
+            if (avatarUrl != null && !avatarUrl.trim().isEmpty()) {
+                loadAvatarFromUrl(avatarUrl, avatarImage);
+            } else {
+                avatarImage.setImageResource(
+                        android.R.drawable.sym_def_app_icon
+                );
+
+                avatarImage.setBackgroundResource(
+                        R.drawable.bg_card
+                );
+            }
         }
     }
 
@@ -267,5 +287,43 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
         paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
         canvas.drawBitmap(squareBmp, rect, rect, paint);
         return output;
+    }
+    private boolean loadSavedAvatar() {
+        if (avatarImage == null) {
+            return false;
+        }
+
+        String avatarPath = getSharedPreferences(
+                "USER_PROFILE",
+                MODE_PRIVATE
+        ).getString(
+                "avatar_path",
+                ""
+        );
+
+        if (avatarPath == null || avatarPath.isEmpty()) {
+            return false;
+        }
+
+        File avatarFile = new File(avatarPath);
+
+        if (!avatarFile.exists()) {
+            return false;
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeFile(
+                avatarFile.getAbsolutePath()
+        );
+
+        if (bitmap == null) {
+            return false;
+        }
+
+        Bitmap roundBitmap = getCircleBitmap(bitmap);
+
+        avatarImage.setImageBitmap(roundBitmap);
+        avatarImage.setBackgroundResource(R.drawable.bg_card);
+
+        return true;
     }
 }

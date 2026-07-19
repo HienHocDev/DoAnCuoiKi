@@ -3,15 +3,18 @@ package com.example.doancuoiki;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.InputType;
+import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
 import android.widget.PopupMenu;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
+import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.EditText;
-import android.text.InputType;
 
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
@@ -27,6 +30,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -45,7 +49,7 @@ public class HomeActivity extends Activity {
     private LinearLayout activityFeed;
     private TextView txtTodayTasksHeader;
     private TextView homeUserNameText;
-    private TextView homeAvatarText;
+    private ImageView homeAvatarImage;
     private TextView projectCountText;
     private TextView totalProjectsText;
     private TextView totalTasksText;
@@ -66,7 +70,12 @@ public class HomeActivity extends Activity {
         if (mainLayout != null) {
             ViewCompat.setOnApplyWindowInsetsListener(mainLayout, (v, windowInsets) -> {
                 Insets insets = windowInsets.getInsets(WindowInsetsCompat.Type.systemBars());
-                v.setPadding(v.getPaddingLeft(), insets.top, v.getPaddingRight(), v.getPaddingBottom());
+                v.setPadding(
+                        v.getPaddingLeft(),
+                        insets.top,
+                        v.getPaddingRight(),
+                        v.getPaddingBottom()
+                );
                 return windowInsets;
             });
         }
@@ -77,7 +86,11 @@ public class HomeActivity extends Activity {
         txtTodayTasksHeader = findViewById(R.id.txtTodayTasksHeader);
 
         homeUserNameText = findViewById(R.id.txtHomeUserName);
-        homeAvatarText = findViewById(R.id.txtHomeAvatar);
+        homeAvatarImage = findViewById(R.id.imgHomeAvatar);
+
+        // Hiển thị avatar đã lưu
+        loadSavedHomeAvatar();
+
         projectCountText = findViewById(R.id.txtProjectCount);
         totalProjectsText = findViewById(R.id.txtTotalProjects);
         totalTasksText = findViewById(R.id.txtTotalTasks);
@@ -95,9 +108,13 @@ public class HomeActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
+
         if (projectList != null) {
             loadProjects();
         }
+
+        // Tải lại avatar khi quay về trang chủ
+        loadSavedHomeAvatar();
     }
 
     private void showQuickActionMenu() {
@@ -201,25 +218,31 @@ public class HomeActivity extends Activity {
 
     private void resolveCurrentUser() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
         if (user != null) {
             currentUserId = user.getUid();
-            homeUserNameText.setText(user.getEmail() == null ? "TaskFlow" : user.getEmail());
-            homeAvatarText.setText(initials(user.getEmail()));
+
+            homeUserNameText.setText(
+                    user.getEmail() == null ? "TaskFlow" : user.getEmail()
+            );
+
+            // Hiển thị avatar đã lưu
+            loadSavedHomeAvatar();
+
             loadUserName(user);
         }
     }
-
     private void loadUserName(FirebaseUser firebaseUser) {
         userRepository.getUser(firebaseUser.getUid(), new UserRepository.UserCallback() {
             @Override
             public void onSuccess(User user) {
                 String name = valueOrDefault(user.getName(), firebaseUser.getEmail());
                 homeUserNameText.setText(name);
-                homeAvatarText.setText(initials(name));
             }
 
             @Override
             public void onError(Exception exception) {
+                homeUserNameText.setText(firebaseUser.getEmail());
             }
         });
     }
@@ -444,6 +467,49 @@ public class HomeActivity extends Activity {
             return defaultValue;
         }
         return value.trim();
+    }
+    private boolean loadSavedHomeAvatar() {
+        if (homeAvatarImage == null) {
+            return false;
+        }
+
+        String avatarPath = getSharedPreferences(
+                "USER_PROFILE",
+                MODE_PRIVATE
+        ).getString(
+                "avatar_path",
+                ""
+        );
+
+        if (avatarPath == null || avatarPath.isEmpty()) {
+            homeAvatarImage.setImageResource(
+                    android.R.drawable.sym_def_app_icon
+            );
+            return false;
+        }
+
+        File avatarFile = new File(avatarPath);
+
+        if (!avatarFile.exists()) {
+            homeAvatarImage.setImageResource(
+                    android.R.drawable.sym_def_app_icon
+            );
+            return false;
+        }
+
+        Bitmap bitmap = BitmapFactory.decodeFile(
+                avatarFile.getAbsolutePath()
+        );
+
+        if (bitmap == null) {
+            homeAvatarImage.setImageResource(
+                    android.R.drawable.sym_def_app_icon
+            );
+            return false;
+        }
+
+        homeAvatarImage.setImageBitmap(bitmap);
+        return true;
     }
 
 }
