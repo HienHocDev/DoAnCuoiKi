@@ -95,12 +95,6 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
             startActivity(intent);
         });
 
-        // 2. THÊM VÀO ĐÂY: Bấm Đổi mật khẩu mở thẳng ChangePasswordActivity
-        findViewById(R.id.btnChangePasswordDirect).setOnClickListener(v -> {
-            Intent intent = new Intent(AccountActivity.this, ChangePasswordActivity.class);
-            startActivity(intent);
-        });
-
         // 3. Bấm Quản lý nhóm
         findViewById(R.id.btnManageGroup).setOnClickListener(v ->
                 Toast.makeText(AccountActivity.this, "Quản lý nhóm: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
@@ -113,7 +107,11 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
 
         // 5. Bấm Cài đặt
         findViewById(R.id.btnSettings).setOnClickListener(v ->
-                NavigationUtils.open(this, ChangePasswordActivity.class)
+                Toast.makeText(
+                        AccountActivity.this,
+                        "Cài đặt: Tính năng đang phát triển",
+                        Toast.LENGTH_SHORT
+                ).show()
         );
 
         // 6. Bấm Thông báo

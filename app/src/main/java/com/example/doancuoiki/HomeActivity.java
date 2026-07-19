@@ -55,6 +55,8 @@ public class HomeActivity extends Activity {
     private String currentUserId = GUEST_USER_ID;
     private String currentUserName = "Thành viên";
     private int currentProjectCount = 0;
+    private int currentTaskCount = 0;
+    private List<Project> currentProjects = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,6 +99,14 @@ public class HomeActivity extends Activity {
         super.onResume();
         if (projectList != null) {
             loadProjects();
+            loadTaskSummaryAndTodayTasks();
+            loadRealActivityFeed();
+        }
+        
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            if (androidx.core.content.ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 101);
+            }
         }
     }
 
@@ -119,84 +129,9 @@ public class HomeActivity extends Activity {
     }
 
     private void showQuickTaskDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Tạo công việc hôm nay");
-
-        // Tạo ô nhập liệu nhanh cấu hình chuẩn tiếng Việt
-        final EditText input = new EditText(this);
-        input.setHint("Nhập tiêu đề công việc...");
-        input.setInputType(android.text.InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        input.setPadding(40, 30, 40, 30);
-        builder.setView(input);
-
-        builder.setPositiveButton("Thêm", (dialog, which) -> {
-            String taskTitle = input.getText().toString().trim();
-            if (taskTitle.isEmpty()) {
-                Toast.makeText(HomeActivity.this, "Vui lòng nhập tên công việc", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            String todayStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
-
-            Task newTask = new Task();
-            newTask.setTitle(taskTitle);
-            newTask.setStatus(Task.STATUS_NOT_STARTED);
-            newTask.setDueDate(todayStr);
-            newTask.setCreatorId(currentUserId);
-            newTask.setAssigneeId(currentUserId);
-            newTask.setProjectId("");
-
-            // 2. Đẩy lên TaskRepository
-            taskRepository.addTask(newTask, new TaskRepository.SimpleCallback() {
-                @Override
-                public void onSuccess() {
-                    com.example.doancuoiki.model.NotificationItem notif = new com.example.doancuoiki.model.NotificationItem(
-                            null,
-                            currentUserId,
-                            "Bạn được giao công việc",
-                            newTask.getTitle() + " - Cá nhân",
-                            "task_assigned",
-                            false,
-                            "",
-                            newTask.getId()
-                    );
-                    new com.example.doancuoiki.repository.NotificationRepository().addNotification(notif, new com.example.doancuoiki.repository.NotificationRepository.SimpleCallback() {
-                        @Override
-                        public void onSuccess() {
-                            input.setText("");
-                            NavigationUtils.showMessage(HomeActivity.this, "Đã thêm công việc nhanh");
-                            loadProjects();
-                        }
-                        @Override
-                        public void onError(Exception e) {
-                            input.setText("");
-                            NavigationUtils.showMessage(HomeActivity.this, "Đã thêm công việc nhanh");
-                            loadProjects();
-                        }
-                    });
-
-                    com.example.doancuoiki.model.ActivityLog log = new com.example.doancuoiki.model.ActivityLog();
-                    log.setProjectId("");
-                    log.setUserName(currentUserName);
-                    log.setActionText("đã tạo việc nhanh");
-                    log.setTargetName(taskTitle);
-                    log.setType("task"); // loại công việc
-                    log.setTimestamp(new com.google.firebase.Timestamp(new Date()));
-
-                    projectRepository.addActivityLog(log, null);
-
-                    loadProjects();
-                }
-
-                @Override
-                public void onError(Exception e) {
-                    Toast.makeText(HomeActivity.this, "Lỗi: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
-        });
-
-        builder.setNegativeButton("Hủy", (dialog, which) -> dialog.cancel());
-        builder.show();
+        android.content.Intent intent = new android.content.Intent(this, AddTaskActivity.class);
+        intent.putExtra("isQuickTask", true);
+        startActivity(intent);
     }
 
     private void resolveCurrentUser() {
@@ -228,12 +163,14 @@ public class HomeActivity extends Activity {
         projectRepository.getProjectsByUser(currentUserId, new ProjectRepository.ProjectListCallback() {
             @Override
             public void onSuccess(List<Project> projects) {
+                currentProjects = projects;
                 renderProjects(projects);
                 loadTaskSummaryAndTodayTasks();
             }
 
             @Override
             public void onError(Exception exception) {
+                currentProjects = new ArrayList<>();
                 renderProjects(java.util.Collections.emptyList());
                 loadTaskSummaryAndTodayTasks();
             }
@@ -241,21 +178,45 @@ public class HomeActivity extends Activity {
     }
 
     private void loadTaskSummaryAndTodayTasks() {
-        taskRepository.getTasksForUser(currentUserId, new TaskRepository.TaskListCallback() {
+        taskRepository.getAssignedTasks(currentUserId, new TaskRepository.TaskListCallback() {
             @Override
             public void onSuccess(List<Task> tasks) {
+                currentTaskCount = tasks.size();
                 int done = 0;
                 List<Task> todayTasks = new ArrayList<>();
-                String todayStr = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date());
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                String todayStr = sdf.format(new Date());
+                Date todayDate;
+                try {
+                    todayDate = sdf.parse(todayStr);
+                } catch (Exception e) {
+                    todayDate = new Date();
+                }
 
                 for (Task task : tasks) {
                     if (Task.STATUS_DONE.equals(task.getStatus())) {
                         done++;
                     } else {
-                        // Logic kiểm tra: Hạn hôm nay hoặc Đã quá hạn và chưa hoàn thành
                         String dueDate = task.getDueDate();
-                        if (dueDate != null && (dueDate.equals(todayStr) || dueDate.compareTo(todayStr) < 0)) {
-                            todayTasks.add(task);
+                        if (dueDate != null && !dueDate.equals("Chưa có hạn")) {
+                            if (dueDate.equals(todayStr)) {
+                                todayTasks.add(task);
+                            } else {
+                                try {
+                                    // Handle both dd/MM/yyyy and yyyy-MM-dd formats just in case there is old data
+                                    Date taskDate;
+                                    if (dueDate.contains("-")) {
+                                        taskDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).parse(dueDate);
+                                    } else {
+                                        taskDate = sdf.parse(dueDate);
+                                    }
+                                    if (taskDate != null && taskDate.before(todayDate)) {
+                                        todayTasks.add(task);
+                                    }
+                                } catch (Exception e) {
+                                    // Ignore parse errors
+                                }
+                            }
                         }
                     }
                 }
@@ -270,6 +231,7 @@ public class HomeActivity extends Activity {
 
             @Override
             public void onError(Exception exception) {
+                currentTaskCount = 0;
                 totalProjectsText.setText(currentProjectCount + "\nDự án");
                 totalTasksText.setText("0\nCông việc");
                 doneTasksText.setText("0\nHoàn thành");
@@ -309,7 +271,21 @@ public class HomeActivity extends Activity {
         projectRepository.getRecentActivities(currentUserId, new ProjectRepository.ActivityListCallback() {
             @Override
             public void onSuccess(List<com.example.doancuoiki.model.ActivityLog> logs) {
-                renderActivityFeed(logs);
+                List<com.example.doancuoiki.model.ActivityLog> filtered = new ArrayList<>();
+                for (com.example.doancuoiki.model.ActivityLog log : logs) {
+                    boolean isPersonalTask = "".equals(log.getProjectId()) && currentUserId.equals(log.getUserId());
+                    boolean isInProject = false;
+                    for (Project p : currentProjects) {
+                        if (p.getId().equals(log.getProjectId())) {
+                            isInProject = true;
+                            break;
+                        }
+                    }
+                    if (isPersonalTask || isInProject) {
+                        filtered.add(log);
+                    }
+                }
+                renderActivityFeed(filtered);
             }
 
             @Override
@@ -401,12 +377,13 @@ public class HomeActivity extends Activity {
         for (Project project : projects) {
             totalProgress += project.getProgress();
 
-
+            int memberCount = project.getMembers() != null ? project.getMembers().size() : 0;
             projectList.addView(ViewFactory.homeProjectCard(
                     this,
                     project.getName(),
                     valueOrDefault(project.getDescription(), "Từ " + valueOrDefault(project.getStartDate(), "--") + " đến " + valueOrDefault(project.getEndDate(), "--")),
                     project.getProgress(),
+                    memberCount,
                     v -> openProjectDetail(project)
             ));
         }

@@ -5,6 +5,14 @@ import android.os.Bundle;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.view.View;
+import android.graphics.Color;
+
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.components.Legend;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import java.util.ArrayList;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -23,7 +31,7 @@ public class ReportActivity extends Activity {
 
     private final TaskRepository taskRepository = new TaskRepository();
 
-    private TextView overallProgress;
+    private PieChart pieChart;
     private TextView doneCount;
     private TextView doingCount;
     private TextView todoCount;
@@ -64,7 +72,7 @@ public class ReportActivity extends Activity {
     }
 
     private void bindViews() {
-        overallProgress = findViewById(R.id.txtOverallProgress);
+        pieChart = findViewById(R.id.pieChart);
         doneCount = findViewById(R.id.txtDoneCount);
         doingCount = findViewById(R.id.txtDoingCount);
         todoCount = findViewById(R.id.txtTodoCount);
@@ -107,7 +115,7 @@ public class ReportActivity extends Activity {
         int todo = countByStatus(tasks, Task.STATUS_NOT_STARTED);
         int progress = percent(done, total);
 
-        overallProgress.setText(progress + "%\nHoàn thành");
+        setupPieChart(done, doing, todo, progress);
         doneCount.setText(done + "\nHoàn thành");
         doingCount.setText(doing + "\nĐang làm");
         todoCount.setText(todo + "\nChưa bắt đầu");
@@ -122,6 +130,50 @@ public class ReportActivity extends Activity {
             priorityList.addView(ViewFactory.notificationCard(this, "Chưa có dữ liệu", "Thêm độ ưu tiên cho công việc để xem biểu đồ.", ""));
         }
     }
+
+    private void setupPieChart(int done, int doing, int todo, int progress) {
+        ArrayList<PieEntry> entries = new ArrayList<>();
+        if (done > 0) entries.add(new PieEntry(done, "Hoàn thành"));
+        if (doing > 0) entries.add(new PieEntry(doing, "Đang làm"));
+        if (todo > 0) entries.add(new PieEntry(todo, "Chưa bắt đầu"));
+
+        if (entries.isEmpty()) {
+            pieChart.clear();
+            return;
+        }
+
+        PieDataSet dataSet = new PieDataSet(entries, "");
+        
+        ArrayList<Integer> colors = new ArrayList<>();
+        if (done > 0) colors.add(Color.parseColor("#15B759")); // Xanh lá
+        if (doing > 0) colors.add(Color.parseColor("#FF9800")); // Cam
+        if (todo > 0) colors.add(Color.parseColor("#7D8496")); // Xám
+        dataSet.setColors(colors);
+
+        dataSet.setValueTextColor(Color.WHITE);
+        dataSet.setValueTextSize(14f);
+
+        PieData data = new PieData(dataSet);
+        
+        pieChart.setData(data);
+        pieChart.setUsePercentValues(false);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.setDrawHoleEnabled(true);
+        pieChart.setHoleColor(Color.TRANSPARENT);
+        pieChart.setCenterText(progress + "%\nHoàn thành");
+        pieChart.setCenterTextSize(24f);
+        pieChart.setCenterTextColor(Color.parseColor("#222632"));
+        
+        Legend legend = pieChart.getLegend();
+        legend.setVerticalAlignment(Legend.LegendVerticalAlignment.BOTTOM);
+        legend.setHorizontalAlignment(Legend.LegendHorizontalAlignment.CENTER);
+        legend.setOrientation(Legend.LegendOrientation.HORIZONTAL);
+        legend.setDrawInside(false);
+        
+        pieChart.animateY(1000);
+        pieChart.invalidate();
+    }
+
 
     private void renderProjectProgress(List<Task> tasks) {
         projectList.removeAllViews();
@@ -156,30 +208,52 @@ public class ReportActivity extends Activity {
     private void renderPriorityChart(List<Task> tasks) {
         priorityList.removeAllViews();
 
-        Map<String, Integer> statsMap = new HashMap<>();
-        statsMap.put("Cao", 0);
-        statsMap.put("Trung bình", 0);
-        statsMap.put("Thấp", 0);
+        Map<String, ProjectStats> statsMap = new HashMap<>();
+        statsMap.put("Cao", new ProjectStats());
+        statsMap.put("Trung bình", new ProjectStats());
+        statsMap.put("Thấp", new ProjectStats());
 
         for (Task task : tasks) {
             String priority = valueOrDefault(task.getPriority(), "Trung bình");
-            if (!statsMap.containsKey(priority)) {
-                statsMap.put(priority, 0);
+            ProjectStats stats = statsMap.get(priority);
+            if (stats == null) {
+                stats = new ProjectStats();
+                statsMap.put(priority, stats);
             }
-            statsMap.put(priority, statsMap.get(priority) + 1);
+            stats.total++;
+            if (Task.STATUS_DONE.equals(task.getStatus())) {
+                stats.done++;
+            }
         }
 
-        for (Map.Entry<String, Integer> entry : statsMap.entrySet()) {
-            if (tasks.isEmpty()) {
-                continue;
+        // We want to sort them: Cao, Trung bình, Thấp
+        String[] order = {"Cao", "Trung bình", "Thấp"};
+        for (String key : order) {
+            ProjectStats stats = statsMap.get(key);
+            if (stats != null) {
+                int progress = stats.total > 0 ? percent(stats.done, stats.total) : 0;
+                priorityList.addView(ViewFactory.reportProgressCard(
+                        this,
+                        key,
+                        stats.done + "/" + stats.total + " công việc hoàn thành",
+                        progress
+                ));
             }
-            int progress = percent(entry.getValue(), tasks.size());
-            priorityList.addView(ViewFactory.reportProgressCard(
-                    this,
-                    entry.getKey(),
-                    entry.getValue() + "/" + tasks.size() + " công việc",
-                    progress
-            ));
+        }
+        
+        // Handle any custom priorities that might have been added
+        for (Map.Entry<String, ProjectStats> entry : statsMap.entrySet()) {
+            String key = entry.getKey();
+            if (!key.equals("Cao") && !key.equals("Trung bình") && !key.equals("Thấp")) {
+                ProjectStats stats = entry.getValue();
+                int progress = stats.total > 0 ? percent(stats.done, stats.total) : 0;
+                priorityList.addView(ViewFactory.reportProgressCard(
+                        this,
+                        key,
+                        stats.done + "/" + stats.total + " công việc hoàn thành",
+                        progress
+                ));
+            }
         }
     }
 

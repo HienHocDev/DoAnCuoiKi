@@ -12,6 +12,7 @@ public class ActivityLog {
     private String targetName;
     private String type;
     private Timestamp timestamp;
+    private String userId;
 
     public ActivityLog() {
     }
@@ -22,12 +23,15 @@ public class ActivityLog {
     public String getTargetName() { return targetName; }
     public String getType() { return type; }
     public Timestamp getTimestamp() { return timestamp; }
+    public String getUserId() { return userId; }
+    
     public void setProjectId(String projectId) { this.projectId = projectId; }
     public void setUserName(String userName) { this.userName = userName; }
     public void setActionText(String actionText) { this.actionText = actionText; }
     public void setTargetName(String targetName) { this.targetName = targetName; }
     public void setType(String type) { this.type = type; }
     public void setTimestamp(Timestamp timestamp) { this.timestamp = timestamp; }
+    public void setUserId(String userId) { this.userId = userId; }
     public boolean isComment() {
         return "comment".equals(type);
     }

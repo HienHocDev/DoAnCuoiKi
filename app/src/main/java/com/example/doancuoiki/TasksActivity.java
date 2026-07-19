@@ -42,6 +42,8 @@ public class TasksActivity extends Activity {
     private String currentKeyword = "";
     private String currentUserId = "";
     private String currentFilter = FILTER_ALL;
+    private String currentCategoryFilter = "Tất cả danh mục";
+    private android.widget.ImageView btnFilter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +71,7 @@ public class TasksActivity extends Activity {
         taskList = findViewById(R.id.taskList);
         taskState = findViewById(R.id.txtTaskState);
         searchInput = findViewById(R.id.edtSearchTask);
+        btnFilter = findViewById(R.id.btnFilter);
         tabAll = findViewById(R.id.tabAll);
         tabInProgress = findViewById(R.id.tabInProgress);
         tabPending = findViewById(R.id.tabPending);
@@ -110,6 +113,10 @@ public class TasksActivity extends Activity {
         if (tabDone.getParent() instanceof View) ((View)tabDone.getParent()).setOnClickListener(doneListener);
         if (tabCancelled.getParent() instanceof View) ((View)tabCancelled.getParent()).setOnClickListener(cancelledListener);
 
+        if (btnFilter != null) {
+            btnFilter.setOnClickListener(v -> showCategoryFilterMenu(v));
+        }
+
         updateTabs();
 
         searchInput.addTextChangedListener(new TextWatcher() {
@@ -124,9 +131,24 @@ public class TasksActivity extends Activity {
             }
 
             @Override
-            public void afterTextChanged(Editable s) {
+            public void afterTextChanged(android.text.Editable s) {
             }
         });
+    }
+
+    private void showCategoryFilterMenu(View v) {
+        android.widget.PopupMenu popup = new android.widget.PopupMenu(this, v);
+        popup.getMenu().add(0, 1, 0, "Tất cả danh mục");
+        popup.getMenu().add(0, 2, 1, "Công việc");
+        popup.getMenu().add(0, 3, 2, "Học tập");
+        popup.getMenu().add(0, 4, 3, "Cá nhân");
+        
+        popup.setOnMenuItemClickListener(item -> {
+            currentCategoryFilter = item.getTitle().toString();
+            renderTasks();
+            return true;
+        });
+        popup.show();
     }
 
     private void setFilter(String filter) {
@@ -239,6 +261,14 @@ public class TasksActivity extends Activity {
     }
 
     private boolean matchesFilter(Task task) {
+        if (!"Tất cả danh mục".equals(currentCategoryFilter)) {
+            String cat = task.getCategory();
+            if (cat == null) cat = "Chưa có";
+            if (!currentCategoryFilter.equals(cat)) {
+                return false;
+            }
+        }
+
         if (FILTER_ALL.equals(currentFilter)) {
             return true;
         }

@@ -79,7 +79,7 @@ public final class ViewFactory {
         return card;
     }
 
-    public static View homeProjectCard(Context context, String name, String subtitle, int progress, View.OnClickListener listener) {
+    public static View homeProjectCard(Context context, String name, String subtitle, int progress, int memberCount, View.OnClickListener listener) {
         LinearLayout card = card(context);
         card.setPadding(dp(context, 16), dp(context, 16), dp(context, 16), dp(context, 16));
         card.setOnClickListener(listener);
@@ -129,10 +129,10 @@ public final class ViewFactory {
         }
         bottomInfo.addView(progressBar, new LinearLayout.LayoutParams(0, dp(context, 6), 1));
         
-        TextView memberCount = text(context, " 3 thành viên", 11, false, Color.rgb(125, 132, 150));
+        TextView memberCountView = text(context, " " + memberCount + " thành viên", 11, false, Color.rgb(125, 132, 150));
         LinearLayout.LayoutParams memberParams = new LinearLayout.LayoutParams(-2, -2);
         memberParams.leftMargin = dp(context, 12);
-        bottomInfo.addView(memberCount, memberParams);
+        bottomInfo.addView(memberCountView, memberParams);
 
         card.addView(bottomInfo, topParams(-1, dp(context, 16), dp(context, 12)));
 

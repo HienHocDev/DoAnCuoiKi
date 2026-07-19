@@ -146,7 +146,7 @@ public class ProjectRepository {
         com.google.firebase.firestore.FirebaseFirestore.getInstance()
                 .collection("activities")
                 .orderBy("timestamp", com.google.firebase.firestore.Query.Direction.DESCENDING) // Sắp xếp mới nhất lên đầu
-                .limit(5) // Lấy tối đa 5 hoạt động gần nhất
+                .limit(30) // Lấy tối đa 30 hoạt động gần nhất
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     List<com.example.doancuoiki.model.ActivityLog> list = new ArrayList<>();

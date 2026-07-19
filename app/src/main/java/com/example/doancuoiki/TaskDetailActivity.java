@@ -31,6 +31,7 @@ public class TaskDetailActivity extends Activity {
     private TextView categoryText;
     private TextView reminderText;
     private TextView createdText;
+    private View btnDeleteTask;
     
     private Button saveButton;
     private Task currentTask;
@@ -67,6 +68,7 @@ public class TaskDetailActivity extends Activity {
         reminderText = findViewById(R.id.txtTaskReminder);
         createdText = findViewById(R.id.txtTaskCreated);
         saveButton = findViewById(R.id.btnSaveTask);
+        btnDeleteTask = findViewById(R.id.btnDeleteTask);
     }
 
     private void setupActions() {
@@ -77,6 +79,44 @@ public class TaskDetailActivity extends Activity {
         if (statusBadge != null) {
             statusBadge.setOnClickListener(v -> showStatusMenu(v));
         }
+
+        if (btnDeleteTask != null) {
+            btnDeleteTask.setOnClickListener(v -> confirmDeleteTask());
+        }
+    }
+
+    private void confirmDeleteTask() {
+        new android.app.AlertDialog.Builder(this)
+            .setTitle("Xóa công việc")
+            .setMessage("Bạn có chắc chắn muốn xóa công việc này không?")
+            .setPositiveButton("Xóa", (dialog, which) -> {
+                if (currentTask != null) {
+                    taskRepository.deleteTask(currentTask.getId(), new TaskRepository.SimpleCallback() {
+                        @Override
+                        public void onSuccess() {
+                            com.example.doancuoiki.model.ActivityLog log = new com.example.doancuoiki.model.ActivityLog();
+                            log.setProjectId(currentTask.getProjectId() != null ? currentTask.getProjectId() : "");
+                            log.setUserName(currentTask.getAssigneeName() != null ? currentTask.getAssigneeName() : "Thành viên");
+                            log.setUserId(currentUserId);
+                            log.setActionText("đã xóa công việc");
+                            log.setTargetName(currentTask.getTitle());
+                            log.setType("task");
+                            log.setTimestamp(new com.google.firebase.Timestamp(new java.util.Date()));
+                            new com.example.doancuoiki.repository.ProjectRepository().addActivityLog(log, null);
+
+                            NavigationUtils.showMessage(TaskDetailActivity.this, "Đã xóa công việc");
+                            setResult(RESULT_OK);
+                            finish();
+                        }
+                        @Override
+                        public void onError(Exception exception) {
+                            NavigationUtils.showMessage(TaskDetailActivity.this, "Lỗi khi xóa: " + exception.getMessage());
+                        }
+                    });
+                }
+            })
+            .setNegativeButton("Hủy", null)
+            .show();
     }
     
     private void showStatusMenu(View v) {
@@ -142,6 +182,12 @@ public class TaskDetailActivity extends Activity {
     }
 
     private void renderTask() {
+        if (currentTask != null && currentUserId != null && currentUserId.equals(currentTask.getCreatorId())) {
+            btnDeleteTask.setVisibility(View.VISIBLE);
+        } else {
+            btnDeleteTask.setVisibility(View.GONE);
+        }
+
         titleText.setText(valueOrDefault(currentTask.getTitle(), "Công việc"));
         descriptionText.setText(valueOrDefault(currentTask.getDescription(), "Chưa có mô tả"));
         projectText.setText(valueOrDefault(currentTask.getProjectName(), "Chưa có dự án"));

@@ -15,3 +15,8 @@
 local.properties
 PHAN_CONG_CONG_VIEC_NHOM.md
 app/google-services.json
+
+# Local Android Studio config files
+/.idea/deploymentTargetSelector.xml
+/.idea/deploymentTargetDropDown.xml
+/.idea/misc.xml

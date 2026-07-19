@@ -129,7 +129,7 @@ public class AddTaskActivity extends Activity {
 
     private void setupSpinners() {
         setSpinnerItems(prioritySpinner, Arrays.asList("Thấp", "Trung bình", "Cao"));
-        setSpinnerItems(categorySpinner, Arrays.asList("Học tập", "Công việc", "Cá nhân"));
+        setSpinnerItems(categorySpinner, Arrays.asList("Công việc", "Học tập")); // Default for projects
         setSpinnerItems(reminderTypeSpinner, Arrays.asList("Không nhắc", "1 giờ", "1 ngày", "3 ngày"));
     }
 
@@ -142,21 +142,21 @@ public class AddTaskActivity extends Activity {
                     @Override
                     public void onSuccess(List<Project> loadedProjects) {
                         projects.clear();
+                        
+                        Project personalProject = new Project();
+                        personalProject.setId("");
+                        personalProject.setName("Không có dự án (Cá nhân)");
+                        personalProject.setOwnerId(currentUserId);
+                        projects.add(personalProject);
+                        
                         projects.addAll(loadedProjects);
-                        if (projects.isEmpty()) {
-                            setSpinnerItems(projectSpinner,
-                                    Collections.singletonList("Bạn chưa có dự án do mình làm chủ"));
-                            setSpinnerItems(assigneeSpinner,
-                                    Collections.singletonList("Chưa có thành viên"));
-                            return;
-                        }
 
                         List<String> names = new ArrayList<>();
                         int selectedIndex = 0;
                         for (int i = 0; i < projects.size(); i++) {
                             Project project = projects.get(i);
                             names.add(valueOrDefault(project.getName(), "Dự án chưa đặt tên"));
-                            if (project.getId().equals(requestedProjectId)) {
+                            if (requestedProjectId != null && project.getId().equals(requestedProjectId)) {
                                 selectedIndex = i;
                             }
                         }
@@ -210,6 +210,22 @@ public class AddTaskActivity extends Activity {
 
     private void loadAssigneesForSelectedProject() {
         Project project = selectedProject();
+        
+        if (project != null && "".equals(project.getId())) {
+            assignees.clear();
+            User currentUser = new User();
+            currentUser.setId(currentUserId);
+            currentUser.setName("Chính mình");
+            assignees.add(currentUser);
+            setSpinnerItems(assigneeSpinner, Collections.singletonList("Chính mình"));
+            assigneeSpinner.setEnabled(false);
+            setSpinnerItems(categorySpinner, Collections.singletonList("Cá nhân"));
+            return;
+        } else {
+            assigneeSpinner.setEnabled(true);
+            setSpinnerItems(categorySpinner, Arrays.asList("Công việc", "Học tập"));
+        }
+
         if (project == null || !currentUserId.equals(project.getOwnerId())) {
             assignees.clear();
             setSpinnerItems(assigneeSpinner, Collections.singletonList("Chưa có thành viên"));
@@ -249,7 +265,7 @@ public class AddTaskActivity extends Activity {
             NavigationUtils.showMessage(this, "Vui lòng nhập tên công việc");
             return;
         }
-        if (project == null || !currentUserId.equals(project.getOwnerId())) {
+        if (project == null || (!"".equals(project.getId()) && !currentUserId.equals(project.getOwnerId()))) {
             NavigationUtils.showMessage(this, "Bạn không có quyền giao việc trong dự án này");
             return;
         }
@@ -262,11 +278,11 @@ public class AddTaskActivity extends Activity {
         Task task = new Task(
                 null,
                 project.getId(),
-                valueOrDefault(project.getName(), "Dự án"),
+                "".equals(project.getId()) ? "" : valueOrDefault(project.getName(), "Dự án"),
                 title,
                 descriptionInput.getText().toString().trim(),
                 assignee.getId(),
-                valueOrDefault(assignee.getName(),
+                "".equals(project.getId()) ? "Chính mình" : valueOrDefault(assignee.getName(),
                         valueOrDefault(assignee.getEmail(), "Thành viên")),
                 currentUserId,
                 Task.STATUS_NOT_STARTED,
@@ -274,6 +290,7 @@ public class AddTaskActivity extends Activity {
                 today,
                 valueOrDefault(dueDateInput.getText().toString(), "Chưa có hạn")
         );
+        task.setCategory(selectedSpinnerText(categorySpinner));
         
         task.setReminderTime(valueOrDefault(edtReminderTime.getText().toString(), ""));
         task.setReminderType(selectedSpinnerText(reminderTypeSpinner));
@@ -283,6 +300,35 @@ public class AddTaskActivity extends Activity {
             public void onSuccess() {
                 com.example.doancuoiki.utils.AlarmUtils.scheduleTaskAlarm(AddTaskActivity.this, task);
                 
+                // Add Activity Log
+                userRepository.getUser(currentUserId, new UserRepository.UserCallback() {
+                    @Override
+                    public void onSuccess(User user) {
+                        String cName = user.getName() != null && !user.getName().isEmpty() ? user.getName() : "Thành viên";
+                        com.example.doancuoiki.model.ActivityLog log = new com.example.doancuoiki.model.ActivityLog();
+                        log.setProjectId(task.getProjectId() != null ? task.getProjectId() : "");
+                        log.setUserName(cName);
+                        log.setUserId(currentUserId);
+                        log.setActionText("đã tạo công việc");
+                        log.setTargetName(task.getTitle());
+                        log.setType("task");
+                        log.setTimestamp(new com.google.firebase.Timestamp(new java.util.Date()));
+                        projectRepository.addActivityLog(log, null);
+                    }
+                    @Override
+                    public void onError(Exception e) {
+                        com.example.doancuoiki.model.ActivityLog log = new com.example.doancuoiki.model.ActivityLog();
+                        log.setProjectId(task.getProjectId() != null ? task.getProjectId() : "");
+                        log.setUserName("Thành viên");
+                        log.setUserId(currentUserId);
+                        log.setActionText("đã tạo công việc");
+                        log.setTargetName(task.getTitle());
+                        log.setType("task");
+                        log.setTimestamp(new com.google.firebase.Timestamp(new java.util.Date()));
+                        projectRepository.addActivityLog(log, null);
+                    }
+                });
+
                 com.example.doancuoiki.model.NotificationItem notif = new com.example.doancuoiki.model.NotificationItem(
                         null,
                         task.getAssigneeId(),
