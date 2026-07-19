@@ -2,6 +2,8 @@ package com.example.doancuoiki;
 
 import android.app.DatePickerDialog;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Button;
@@ -16,6 +18,9 @@ import com.example.doancuoiki.repository.UserRepository;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -53,12 +58,14 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
         editBirthDate = findViewById(R.id.editBirthDate);
         btnSaveProfile = findViewById(R.id.btnSaveProfile);
 
+        // Tải lại ảnh đại diện đã lưu khi mở màn hình
+        loadSavedAvatar();
+
         // KHOÁ KHÔNG CHO GÕ CHỮ VÀO Ô NGÀY SINH ĐỂ BẮT BUỘC CHỌN TỪ LỊCH
         if (editBirthDate != null) {
             editBirthDate.setFocusable(false);
             editBirthDate.setClickable(true);
 
-            // SỰ KIỆN BẤM VÀO Ô NGÀY SINH -> HIỂN THỊ LỊCH ĐỂ CHỌN
             editBirthDate.setOnClickListener(v -> {
                 Calendar calendar = Calendar.getInstance();
                 int year = calendar.get(Calendar.YEAR);
@@ -68,15 +75,24 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                 DatePickerDialog datePickerDialog = new DatePickerDialog(
                         ProfileDetailActivity.this,
                         (view, selectedYear, selectedMonth, selectedDay) -> {
-                            // Định dạng ngày hiển thị dd/MM/yyyy
-                            String formattedDate = String.format("%02d/%02d/%d", selectedDay, (selectedMonth + 1), selectedYear);
+                            String formattedDate = String.format(
+                                    "%02d/%02d/%d",
+                                    selectedDay,
+                                    selectedMonth + 1,
+                                    selectedYear
+                            );
+
                             editBirthDate.setText(formattedDate);
                         },
-                        year, month, day
+                        year,
+                        month,
+                        day
                 );
+
                 datePickerDialog.show();
             });
         }
+
 
         // 2. Sự kiện nút quay lại và chọn ảnh
         if (btnBack != null) btnBack.setOnClickListener(v -> finish());
@@ -107,7 +123,8 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                             String birthDate = documentSnapshot.getString("birthDate");
 
                             if (editPhone != null && phone != null) editPhone.setText(phone);
-                            if (editAddress != null && address != null) editAddress.setText(address);
+                            if (editAddress != null && address != null)
+                                editAddress.setText(address);
 
                             if (editEmployeeCode != null) {
                                 if (employeeCode != null && !employeeCode.isEmpty()) {
@@ -117,7 +134,8 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                                 }
                             }
 
-                            if (editBirthDate != null && birthDate != null) editBirthDate.setText(birthDate);
+                            if (editBirthDate != null && birthDate != null)
+                                editBirthDate.setText(birthDate);
                         }
                     });
 
@@ -139,6 +157,7 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
                         }
                     }
                 }
+
                 @Override
                 public void onError(Exception exception) {
                     Toast.makeText(ProfileDetailActivity.this, "Lỗi tải thông tin tên!", Toast.LENGTH_SHORT).show();
@@ -194,10 +213,65 @@ public class ProfileDetailActivity extends androidx.activity.ComponentActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == PICK_IMAGE_DETAIL_REQUEST && resultCode == RESULT_OK && data != null && data.getData() != null) {
+
+        if (requestCode == PICK_IMAGE_DETAIL_REQUEST
+                && resultCode == RESULT_OK
+                && data != null
+                && data.getData() != null) {
+
             Uri selectedImageUri = data.getData();
+
+            // Lưu ảnh vào bộ nhớ trong của ứng dụng
+            saveAvatarToInternalStorage(selectedImageUri);
+        }
+    }
+
+    private void saveAvatarToInternalStorage(Uri imageUri) {
+        try {
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+
+            if (inputStream == null) return;
+
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            inputStream.close();
+
+            File avatarFile = new File(getFilesDir(), "avatar.jpg");
+
+            FileOutputStream outputStream = new FileOutputStream(avatarFile);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 90, outputStream);
+            outputStream.flush();
+            outputStream.close();
+
             if (detailAvatar != null) {
-                detailAvatar.setImageURI(selectedImageUri);
+                detailAvatar.setImageBitmap(bitmap);
+            }
+
+            getSharedPreferences("USER_PROFILE", MODE_PRIVATE)
+                    .edit()
+                    .putString("avatar_path", avatarFile.getAbsolutePath())
+                    .apply();
+
+            Toast.makeText(this, "Đã lưu ảnh đại diện", Toast.LENGTH_SHORT).show();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi lưu ảnh", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void loadSavedAvatar() {
+        String avatarPath = getSharedPreferences("USER_PROFILE", MODE_PRIVATE)
+                .getString("avatar_path", "");
+
+        if (avatarPath.isEmpty()) return;
+
+        File avatarFile = new File(avatarPath);
+
+        if (avatarFile.exists()) {
+            Bitmap bitmap = BitmapFactory.decodeFile(avatarFile.getAbsolutePath());
+
+            if (detailAvatar != null) {
+                detailAvatar.setImageBitmap(bitmap);
             }
         }
     }
