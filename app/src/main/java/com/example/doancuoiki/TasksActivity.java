@@ -35,10 +35,7 @@ public class TasksActivity extends Activity {
     private LinearLayout taskList;
     private TextView taskState;
     private EditText searchInput;
-    private TextView tabAll;
-    private TextView tabTodo;
-    private TextView tabDoing;
-    private TextView tabDone;
+    private TextView tabAll, tabInProgress, tabDone, tabCancelled;
     private String currentKeyword = "";
     private String currentUserId = "";
     private String currentFilter = FILTER_ALL;
@@ -64,8 +61,8 @@ public class TasksActivity extends Activity {
         loadTasks();
     }
 
-    private View tabAllUnderline, tabInProgressUnderline, tabPendingUnderline, tabDoneUnderline, tabCancelledUnderline;
-    private TextView tabInProgress, tabPending, tabCancelled;
+
+    private View tabAllUnderline, tabInProgressUnderline, tabDoneUnderline, tabCancelledUnderline;
 
     private void bindViews() {
         taskList = findViewById(R.id.taskList);
@@ -74,13 +71,13 @@ public class TasksActivity extends Activity {
         btnFilter = findViewById(R.id.btnFilter);
         tabAll = findViewById(R.id.tabAll);
         tabInProgress = findViewById(R.id.tabInProgress);
-        tabPending = findViewById(R.id.tabPending);
+
         tabDone = findViewById(R.id.tabDone);
         tabCancelled = findViewById(R.id.tabCancelled);
         
         tabAllUnderline = findViewById(R.id.tabAllUnderline);
         tabInProgressUnderline = findViewById(R.id.tabInProgressUnderline);
-        tabPendingUnderline = findViewById(R.id.tabPendingUnderline);
+
         tabDoneUnderline = findViewById(R.id.tabDoneUnderline);
         tabCancelledUnderline = findViewById(R.id.tabCancelledUnderline);
     }
@@ -97,19 +94,19 @@ public class TasksActivity extends Activity {
 
         View.OnClickListener allListener = v -> setFilter(FILTER_ALL);
         View.OnClickListener inProgressListener = v -> setFilter(Task.STATUS_IN_PROGRESS);
-        View.OnClickListener pendingListener = v -> setFilter(Task.STATUS_PENDING);
+
         View.OnClickListener doneListener = v -> setFilter(Task.STATUS_DONE);
         View.OnClickListener cancelledListener = v -> setFilter(Task.STATUS_CANCELLED);
 
         tabAll.setOnClickListener(allListener);
         tabInProgress.setOnClickListener(inProgressListener);
-        tabPending.setOnClickListener(pendingListener);
+
         tabDone.setOnClickListener(doneListener);
         tabCancelled.setOnClickListener(cancelledListener);
         
         if (tabAll.getParent() instanceof View) ((View)tabAll.getParent()).setOnClickListener(allListener);
         if (tabInProgress.getParent() instanceof View) ((View)tabInProgress.getParent()).setOnClickListener(inProgressListener);
-        if (tabPending.getParent() instanceof View) ((View)tabPending.getParent()).setOnClickListener(pendingListener);
+
         if (tabDone.getParent() instanceof View) ((View)tabDone.getParent()).setOnClickListener(doneListener);
         if (tabCancelled.getParent() instanceof View) ((View)tabCancelled.getParent()).setOnClickListener(cancelledListener);
 
@@ -160,7 +157,6 @@ public class TasksActivity extends Activity {
     private void updateTabs() {
         styleTab(tabAll, FILTER_ALL.equals(currentFilter), tabAllUnderline);
         styleTab(tabInProgress, Task.STATUS_IN_PROGRESS.equals(currentFilter), tabInProgressUnderline);
-        styleTab(tabPending, Task.STATUS_PENDING.equals(currentFilter), tabPendingUnderline);
         styleTab(tabDone, Task.STATUS_DONE.equals(currentFilter), tabDoneUnderline);
         styleTab(tabCancelled, Task.STATUS_CANCELLED.equals(currentFilter), tabCancelledUnderline);
     }
@@ -239,9 +235,7 @@ public class TasksActivity extends Activity {
         if (Task.STATUS_IN_PROGRESS.equals(currentFilter)) {
             return "Không có công việc đang làm.";
         }
-        if (Task.STATUS_PENDING.equals(currentFilter)) {
-            return "Không có công việc đang chờ.";
-        }
+
         if (Task.STATUS_DONE.equals(currentFilter)) {
             return "Không có công việc đã xong.";
         }
@@ -275,9 +269,7 @@ public class TasksActivity extends Activity {
         if (Task.STATUS_IN_PROGRESS.equals(currentFilter)) {
             return Task.STATUS_IN_PROGRESS.equals(task.getStatus());
         }
-        if (Task.STATUS_PENDING.equals(currentFilter)) {
-            return Task.STATUS_PENDING.equals(task.getStatus());
-        }
+
         if (Task.STATUS_DONE.equals(currentFilter)) {
             return Task.STATUS_DONE.equals(task.getStatus());
         }

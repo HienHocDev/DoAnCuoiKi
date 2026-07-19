@@ -124,8 +124,7 @@ public class TaskDetailActivity extends Activity {
         popup.getMenu().add(0, 1, 0, Task.STATUS_NOT_STARTED);
         popup.getMenu().add(0, 2, 1, Task.STATUS_IN_PROGRESS);
         popup.getMenu().add(0, 3, 2, Task.STATUS_DONE);
-        popup.getMenu().add(0, 4, 3, Task.STATUS_PENDING);
-        popup.getMenu().add(0, 5, 4, Task.STATUS_CANCELLED);
+        popup.getMenu().add(0, 4, 3, Task.STATUS_CANCELLED);
         popup.setOnMenuItemClickListener(item -> {
             currentTask.setStatus(item.getTitle().toString());
             renderTask(); // Update UI

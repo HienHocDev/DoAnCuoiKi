@@ -99,15 +99,11 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
             startActivity(intent);
         });
 
-        // 3. Bấm Quản lý nhóm
-        findViewById(R.id.btnManageGroup).setOnClickListener(v ->
-                Toast.makeText(AccountActivity.this, "Quản lý nhóm: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
-        );
-
         // 4. Bấm Dự án của tôi
-        findViewById(R.id.btnMyProjects).setOnClickListener(v ->
-                Toast.makeText(AccountActivity.this, "Dự án của tôi: Tính năng đang phát triển", Toast.LENGTH_SHORT).show()
-        );
+        findViewById(R.id.btnMyProjects).setOnClickListener(v -> {
+            Intent intent = new Intent(AccountActivity.this, ProjectsActivity.class);
+            startActivity(intent);
+        });
 
         // 5. Bấm Cài đặt
         findViewById(R.id.btnSettings).setOnClickListener(v ->
