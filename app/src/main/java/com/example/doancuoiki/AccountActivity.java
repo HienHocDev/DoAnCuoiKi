@@ -13,6 +13,7 @@ import android.os.Bundle;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.app.AlertDialog;
 
 import com.example.doancuoiki.model.User;
 import com.example.doancuoiki.repository.AuthRepository;
@@ -106,27 +107,34 @@ public class AccountActivity extends androidx.activity.ComponentActivity {
         });
 
         // 5. Bấm Cài đặt
-        findViewById(R.id.btnSettings).setOnClickListener(v ->
-                Toast.makeText(
-                        AccountActivity.this,
-                        "Cài đặt: Tính năng đang phát triển",
-                        Toast.LENGTH_SHORT
-                ).show()
-        );
+        findViewById(R.id.btnSettings).setOnClickListener(v -> {
+            Intent intent = new Intent(
+                    AccountActivity.this,
+                    SettingsActivity.class
+            );
+            startActivity(intent);
+        });
+
+
+        // 5.1. Bấm Đổi mật khẩu
+        findViewById(R.id.btnChangePassword).setOnClickListener(v -> {
+            Intent intent = new Intent(AccountActivity.this, ChangePasswordActivity.class);
+            startActivity(intent);
+        });
 
         // 6. Bấm Thông báo
         findViewById(R.id.btnNotificationSetting).setOnClickListener(v ->
                 NavigationUtils.open(this, NotificationsActivity.class));
-
-        // 7. Bấm Trợ giúp
-        findViewById(R.id.btnHelp).setOnClickListener(v ->
-                NavigationUtils.showMessage(this, "Trung tâm trợ giúp: đang cập nhật..."));
 
         // 8. Bấm Đăng xuất (Được làm sạch, không dính code thừa nữa)
         findViewById(R.id.btnLogout).setOnClickListener(v -> {
             authRepository.logout();
             NavigationUtils.openAndFinish(this, LoginActivity.class);
         });
+
+        // 7. Bấm Trợ giúp
+        findViewById(R.id.btnHelp).setOnClickListener(v ->
+                NavigationUtils.open(this, HelpActivity.class));
     }
 
     private void loadProfile() {

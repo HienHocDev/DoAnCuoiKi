@@ -27,6 +27,7 @@ public class LoginActivity extends Activity {
         setupActions();
     }
 
+    //Nhập mk
     private void bindViews() {
         emailInput = findViewById(R.id.edtEmail);
         passwordInput = findViewById(R.id.edtPassword);
