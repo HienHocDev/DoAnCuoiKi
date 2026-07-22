@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_back_button_outlined"
+            android:src="@drawable/ic_back_u_turn"
+            android:padding="8dp"
+            app:tint="#7D8496" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Chỉnh sửa công việc"
+            android:textColor="#222632"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Cập nhật thông tin công việc"
+            android:textColor="#7D8496"
+            android:textSize="14sp" />
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="Tên công việc *"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtTaskTitle"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:hint="Nhập tên công việc" />
+
+        <!-- Description -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Mô tả"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtTaskDescription"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:gravity="top"
+            android:hint="Nhập mô tả công việc"
+            android:inputType="textMultiLine"
+            android:minHeight="90dp" />
+
+        <!-- Due Date -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Hạn hoàn thành"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtTaskDueDate"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:focusable="false"
+            android:hint="dd/MM/yyyy"
+            android:inputType="none" />
+
+        <!-- Priority -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Độ ưu tiên"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spinnerPriority"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp" />
+
+        <!-- Status -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Trạng thái"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spinnerStatus"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp" />
+
+        <!-- Reminder -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Nhắc nhở"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <Spinner
+            android:id="@+id/spinnerReminderType"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/edtReminderTime"
+            style="@style/FormInput"
+            android:layout_marginTop="10dp"
+            android:focusable="false"
+            android:hint="Giờ nhắc (HH:mm)"
+            android:inputType="none" />
+
+        <!-- State message -->
+        <TextView
+            android:id="@+id/txtEditState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="#EF4444"
+            android:textSize="13sp" />
+
+        <!-- Save Button -->
+        <TextView
+            android:id="@+id/btnSaveTask"
+            style="@style/PrimaryButton"
+            android:layout_marginTop="12dp"
+            android:text="Lưu thay đổi" />
+
+    </LinearLayout>
+</ScrollView>

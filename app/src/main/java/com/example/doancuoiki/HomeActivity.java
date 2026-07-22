@@ -279,15 +279,47 @@ public class HomeActivity extends Activity {
         }
 
         for (Task task : todayTasks) {
-            // Sử dụng một hàm thông báo/thẻ checklist gọn nhẹ từ ViewFactory
-            todayTaskList.addView(ViewFactory.notificationCard(
+            String statusLabel = Task.STATUS_DONE.equals(task.getStatus()) ? "✓ Xong" : "Đang làm";
+            android.view.View card = ViewFactory.notificationCard(
                     this,
-                    "[ ] " + task.getTitle(),
-                    "Hạn chót: " + valueOrDefault(task.getDueDate(), "--"),
-                    "Task"
-            ));
+                    task.getTitle(),
+                    "Hạn: " + valueOrDefault(task.getDueDate(), "--") + "  •  " + statusLabel,
+                    Task.STATUS_DONE.equals(task.getStatus()) ? "Đã đọc" : "Task"
+            );
+
+            // B9: Click → mở TaskDetailActivity
+            card.setOnClickListener(v -> {
+                Intent intent = new Intent(this, TaskDetailActivity.class);
+                intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, task.getId());
+                startActivity(intent);
+            });
+
+            // B9: Long press → đánh dấu hoàn thành nhanh
+            card.setOnLongClickListener(v -> {
+                if (!Task.STATUS_DONE.equals(task.getStatus())) {
+                    new AlertDialog.Builder(this)
+                            .setTitle("Đánh dấu hoàn thành?")
+                            .setMessage("\"" + task.getTitle() + "\"")
+                            .setPositiveButton("Xong", (d, w) -> {
+                                task.setStatus(Task.STATUS_DONE);
+                                taskRepository.updateTaskStatus(task.getId(), Task.STATUS_DONE,
+                                        new TaskRepository.SimpleCallback() {
+                                            @Override public void onSuccess() {
+                                                loadTaskSummaryAndTodayTasks();
+                                            }
+                                            @Override public void onError(Exception e) {}
+                                        });
+                            })
+                            .setNegativeButton("Hủy", null)
+                            .show();
+                }
+                return true;
+            });
+
+            todayTaskList.addView(card);
         }
     }
+
 
     private void loadRealActivityFeed() {
         // Gọi hàm từ repository để lấy danh sách hoạt động thật của user

@@ -22,6 +22,7 @@ public class Task {
     private String category;
     private String reminderTime;
     private String reminderType;
+    private java.util.List<String> comments;
 
     public Task() {
     }
@@ -161,5 +162,13 @@ public class Task {
 
     public void setReminderType(String reminderType) {
         this.reminderType = reminderType;
+    }
+
+    public java.util.List<String> getComments() {
+        return comments;
+    }
+
+    public void setComments(java.util.List<String> comments) {
+        this.comments = comments;
     }
 }

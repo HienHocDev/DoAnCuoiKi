@@ -117,6 +117,14 @@ public class ProjectRepository {
                 .addOnFailureListener(callback::onError);
     }
 
+    public void removeMember(String projectId, String userId, SimpleCallback callback) {
+        db.collection(COLLECTION_PROJECTS)
+                .document(projectId)
+                .update("members", FieldValue.arrayRemove(userId))
+                .addOnSuccessListener(unused -> callback.onSuccess())
+                .addOnFailureListener(callback::onError);
+    }
+
     public void deleteProject(String projectId, SimpleCallback callback) {
         db.collection("tasks").whereEqualTo("projectId", projectId).get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {

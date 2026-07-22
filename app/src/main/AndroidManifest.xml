@@ -25,6 +25,8 @@
         <activity android:name=".ReportActivity" />
         <activity android:name=".ProjectDetailActivity" />
         <activity android:name=".AddProjectActivity" />
+        <activity android:name=".EditProjectActivity" />
+        <activity android:name=".EditTaskActivity" />
         <activity android:name=".AccountActivity" />
         <activity android:name=".CalendarActivity" />
         <activity android:name=".TasksActivity" />

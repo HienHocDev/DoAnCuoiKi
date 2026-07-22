@@ -8,23 +8,47 @@
     <LinearLayout style="@style/ScreenContent">
 
         <ImageView
-        android:id="@+id/btnBack"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        
-        android:background="@drawable/bg_back_button_outlined"
-        android:src="@drawable/ic_back_u_turn"
-        app:tint="#7D8496"
-        android:padding="8dp" />
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_back_button_outlined"
+            android:src="@drawable/ic_back_u_turn"
+            app:tint="#7D8496"
+            android:padding="8dp" />
 
-        <TextView
-            style="@style/ScreenTitle"
-            android:text="Thông báo"
-            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="12dp">
 
-        <TextView
-            style="@style/ScreenSubtitle"
-            android:text="Nhắc việc được giao, đến hạn và đã hoàn thành" />
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    style="@style/ScreenTitle"
+                    android:layout_marginTop="0dp"
+                    android:text="Thông báo" />
+
+                <TextView
+                    style="@style/ScreenSubtitle"
+                    android:text="Nhắc việc được giao, đến hạn và đã hoàn thành" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btnMarkAllRead"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đọc tất cả"
+                android:textSize="12sp"
+                android:textColor="#15803D"
+                android:backgroundTint="#E8F5E9"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/txtNotificationState"
@@ -42,3 +66,4 @@
             android:orientation="vertical" />
     </LinearLayout>
 </ScrollView>
+
