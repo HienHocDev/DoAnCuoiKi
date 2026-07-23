@@ -1,11 +1,14 @@
 package com.example.doancuoiki;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -14,7 +17,6 @@ import com.example.doancuoiki.model.NotificationItem;
 import com.example.doancuoiki.model.Task;
 import com.example.doancuoiki.repository.NotificationRepository;
 import com.example.doancuoiki.repository.TaskRepository;
-import com.example.doancuoiki.utils.DateUtils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -32,6 +34,7 @@ public class NotificationsActivity extends Activity {
 
     private LinearLayout notificationList;
     private TextView notificationState;
+    private Button btnMarkAllRead;
     private String currentUserId = GUEST_USER_ID;
 
     @Override
@@ -50,7 +53,13 @@ public class NotificationsActivity extends Activity {
 
         notificationList = findViewById(R.id.notificationList);
         notificationState = findViewById(R.id.txtNotificationState);
+        btnMarkAllRead = findViewById(R.id.btnMarkAllRead);
         findViewById(R.id.btnBack).setOnClickListener(v -> finish());
+
+        // B7 — Mark all read button
+        if (btnMarkAllRead != null) {
+            btnMarkAllRead.setOnClickListener(v -> markAllRead());
+        }
 
         resolveCurrentUser();
         loadNotifications();
@@ -72,7 +81,7 @@ public class NotificationsActivity extends Activity {
     }
 
     private void loadNotifications() {
-        notificationState.setText("Đang tải thông báo...");
+        if (notificationState != null) notificationState.setText("Đang tải thông báo...");
         notifications.clear();
 
         notificationRepository.getNotificationsByUser(currentUserId, new NotificationRepository.NotificationListCallback() {
@@ -91,8 +100,6 @@ public class NotificationsActivity extends Activity {
         });
     }
 
-
-
     private void deduplicateNotifications() {
         Map<String, NotificationItem> notificationMap = new LinkedHashMap<>();
         for (NotificationItem notification : notifications) {
@@ -110,12 +117,22 @@ public class NotificationsActivity extends Activity {
     private void renderNotifications() {
         notificationList.removeAllViews();
 
+        long unreadCount = notifications.stream().filter(n -> !n.isRead()).count();
+
         if (notifications.isEmpty()) {
-            notificationState.setText("Chưa có thông báo.");
+            if (notificationState != null) notificationState.setText("Chưa có thông báo.");
+            if (btnMarkAllRead != null) btnMarkAllRead.setVisibility(View.GONE);
             return;
         }
 
-        notificationState.setText("Có " + notifications.size() + " thông báo.");
+        if (notificationState != null) {
+            notificationState.setText("Có " + notifications.size() + " thông báo"
+                    + (unreadCount > 0 ? " (" + unreadCount + " chưa đọc)" : " (Đã đọc tất cả)"));
+        }
+        if (btnMarkAllRead != null) {
+            btnMarkAllRead.setVisibility(unreadCount > 0 ? View.VISIBLE : View.GONE);
+        }
+
         for (NotificationItem notification : notifications) {
             View card = ViewFactory.notificationCard(
                     this,
@@ -123,20 +140,82 @@ public class NotificationsActivity extends Activity {
                     notification.getMessage(),
                     notification.isRead() ? "Đã đọc" : notification.getCreatedAt()
             );
+
+            // B7 — Long-press to delete notification
+            card.setOnLongClickListener(v -> {
+                showDeleteDialog(notification);
+                return true;
+            });
+
             if (notification.getTaskId() != null && !notification.getTaskId().isEmpty()) {
-                card.setOnClickListener(v -> openTaskDetail(notification.getTaskId()));
+                card.setOnClickListener(v -> {
+                    markAsRead(notification);
+                    openTaskDetail(notification.getTaskId());
+                });
             } else if (notification.getId() != null) {
-                // Fallback for old notifications that didn't have taskId saved (if any)
                 String id = notification.getId();
                 if (id.startsWith("task-")) id = id.replace("task-", "");
                 if (id.startsWith("deadline-")) id = id.replace("deadline-", "");
                 if (id.startsWith("done-")) id = id.replace("done-", "");
-                
                 final String finalId = id;
-                card.setOnClickListener(v -> openTaskDetail(finalId));
+                card.setOnClickListener(v -> {
+                    markAsRead(notification);
+                    openTaskDetail(finalId);
+                });
             }
             notificationList.addView(card);
         }
+    }
+
+    private void markAsRead(NotificationItem notification) {
+        if (notification.isRead() || notification.getId() == null) return;
+        notification.setRead(true);
+        // Update in Firestore
+        com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                .collection("notifications")
+                .document(notification.getId())
+                .update("read", true);
+    }
+
+    private void markAllRead() {
+        notificationRepository.markAllRead(currentUserId, new NotificationRepository.SimpleCallback() {
+            @Override
+            public void onSuccess() {
+                for (NotificationItem n : notifications) {
+                    n.setRead(true);
+                }
+                renderNotifications();
+                NavigationUtils.showMessage(NotificationsActivity.this, "Đã đánh dấu đã đọc tất cả");
+            }
+
+            @Override
+            public void onError(Exception exception) {
+                NavigationUtils.showMessage(NotificationsActivity.this, "Có lỗi xảy ra");
+            }
+        });
+    }
+
+    private void showDeleteDialog(NotificationItem notification) {
+        new AlertDialog.Builder(this)
+                .setTitle("Xóa thông báo")
+                .setMessage("Bạn có muốn xóa thông báo này không?")
+                .setNegativeButton("Hủy", null)
+                .setPositiveButton("Xóa", (dialog, which) -> {
+                    notificationRepository.deleteNotification(notification.getId(),
+                            new NotificationRepository.SimpleCallback() {
+                                @Override
+                                public void onSuccess() {
+                                    notifications.remove(notification);
+                                    renderNotifications();
+                                }
+
+                                @Override
+                                public void onError(Exception exception) {
+                                    NavigationUtils.showMessage(NotificationsActivity.this, "Không xóa được thông báo");
+                                }
+                            });
+                })
+                .show();
     }
 
     private void openTaskDetail(String taskId) {
@@ -144,5 +223,4 @@ public class NotificationsActivity extends Activity {
         intent.putExtra(TaskDetailActivity.EXTRA_TASK_ID, taskId);
         startActivity(intent);
     }
-
 }

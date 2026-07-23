@@ -157,4 +157,12 @@ public class TaskRepository {
                 .addOnSuccessListener(unused -> callback.onSuccess())
                 .addOnFailureListener(callback::onError);
     }
+
+    public void addComment(String taskId, String comment, SimpleCallback callback) {
+        db.collection(COLLECTION_TASKS)
+                .document(taskId)
+                .update("comments", com.google.firebase.firestore.FieldValue.arrayUnion(comment))
+                .addOnSuccessListener(unused -> { if (callback != null) callback.onSuccess(); })
+                .addOnFailureListener(e -> { if (callback != null) callback.onError(e); });
+    }
 }

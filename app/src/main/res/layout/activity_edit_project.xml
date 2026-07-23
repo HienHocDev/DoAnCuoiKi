@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_app"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:id="@+id/main_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <ImageView
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_back_button_outlined"
+            android:contentDescription="Back"
+            android:src="@drawable/ic_back_u_turn"
+            android:padding="8dp"
+            app:tint="#7D8496" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Chỉnh sửa dự án"
+            android:textColor="#222632"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="Cập nhật thông tin dự án"
+            android:textColor="#7D8496"
+            android:textSize="14sp" />
+
+        <!-- Project Name -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:text="Tên dự án *"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtProjectName"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:hint="Nhập tên dự án" />
+
+        <!-- Description -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Mô tả"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtProjectDescription"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:gravity="top"
+            android:hint="Nhập mô tả dự án"
+            android:inputType="textMultiLine"
+            android:minHeight="100dp" />
+
+        <!-- Start Date -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Ngày bắt đầu *"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtStartDate"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:focusable="false"
+            android:hint="dd/MM/yyyy"
+            android:inputType="none" />
+
+        <!-- End Date -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Ngày kết thúc *"
+            android:textColor="#222632"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <EditText
+            android:id="@+id/edtEndDate"
+            style="@style/FormInput"
+            android:layout_marginTop="8dp"
+            android:focusable="false"
+            android:hint="dd/MM/yyyy"
+            android:inputType="none" />
+
+        <!-- State message -->
+        <TextView
+            android:id="@+id/txtEditState"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="#EF4444"
+            android:textSize="13sp" />
+
+        <!-- Save Button -->
+        <TextView
+            android:id="@+id/btnSaveProject"
+            style="@style/PrimaryButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:gravity="center"
+            android:paddingVertical="14dp"
+            android:text="Lưu thay đổi"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+    </LinearLayout>
+</ScrollView>
